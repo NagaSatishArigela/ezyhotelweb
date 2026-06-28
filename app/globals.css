@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-orange: #FF8F00;
+  --color-brand-orange-light: #FEF4EA;
+  --color-brand-black: #0F172A;
+  --color-brand-gray: #64748B;
+  --color-brand-pale: #F8FAFC;
+
+  --font-plus-jakarta: var(--font-plus-jakarta-sans);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-plus-jakarta-sans);
+    @apply bg-white text-brand-black;
+  }
+}
+
+@layer utilities {
+  .hero-radial-bg {
+    background: radial-gradient(circle, rgba(255, 143, 0, 0.03) 0%, rgba(255, 255, 255, 1) 70%);
+  }
+
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Defer rendering of off-screen sections — improves LCP + TTI on mobile */
+  .below-fold {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+  }
+
+  .animate-in {
+    animation: animate-in 0.2s ease-out;
+  }
+
+  @keyframes animate-in {
+    from { opacity: 0; transform: translateX(100%); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .slide-in-from-right-full {
+    animation: slide-in-from-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slide-in-from-right {
+    from { opacity: 0; transform: translateX(1.5rem); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+}
