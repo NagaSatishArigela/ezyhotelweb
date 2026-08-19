@@ -94,7 +94,7 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
             <div className="bg-white p-4 lg:p-8 rounded-xl border border-gray-100 shadow-sm space-y-6">
               <h2 className="text-xl font-bold text-gray-900">Location</h2>
               <div className="w-full h-96 bg-gray-100 rounded-xl overflow-hidden relative shadow-inner border border-gray-200 z-0">
-                <HotelLocationMap hotelName={property.name} />
+                <HotelLocationMap hotelName={property.name} lat={property.latitude} lng={property.longitude} />
               </div>
             </div>
           )}

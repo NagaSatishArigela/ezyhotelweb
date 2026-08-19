@@ -94,6 +94,10 @@ export default function RealBookingView({ propertyId }: { propertyId: string }) 
   const finalTotal = baseTotal + taxAmount;
 
   const time24 = to24Hour(time);
+  // Parse WITHOUT a trailing "Z" so the selected wall-clock time is interpreted
+  // in the guest's local timezone; toISOString() then serialises the correct
+  // UTC instant for the backend. Stamping it as UTC (…Z) shifted every booking
+  // by the local offset (e.g. −5:30 in IST).
   const checkIn = new Date(`${date}T${time24}:00`);
   const durationHours = bookingType === "hourly" ? hours : 24;
   const checkOut = new Date(checkIn.getTime() + durationHours * 3600000);
@@ -110,13 +114,14 @@ export default function RealBookingView({ propertyId }: { propertyId: string }) 
         bookingType,
         checkInAt: checkIn.toISOString(),
         durationHours: bookingType === "hourly" ? hours : undefined,
+        // Backend must independently enforce room capacity limits.
         guestCount: guests,
+        guestName,
+        guestPhone,
+        guestEmail: guestEmail || undefined,
+        specialRequests: specialRequests || undefined,
       });
-      await bookingsApi.confirmPayment(accessToken, booking.id, {
-        success: true,
-        paymentRef: `mock_${booking.id}`,
-      });
-      router.push(`/booking-confirm/${booking.id}`);
+      router.push(`/payment?bookingId=${booking.id}`);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
       setIsSubmitting(false);

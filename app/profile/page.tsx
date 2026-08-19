@@ -87,7 +87,7 @@ export default function ProfilePage() {
           {/* Owner operations live in the partner portal — link there */}
           {isOwner ? (
             <a
-              href={`${process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3001"}/login`}
+              href={`${process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000"}/login`}
               className="flex items-center justify-between px-6 py-4 hover:bg-orange-50 transition-colors"
             >
               <div className="flex items-center gap-3 text-sm font-medium text-gray-700">

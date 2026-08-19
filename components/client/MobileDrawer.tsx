@@ -90,9 +90,9 @@ export default function MobileDrawer({ open, onClose, listPropertyHref, listLabe
                   </motion.div>
                 )}
                 <motion.div variants={itemVariants}>
-                  <a href="tel:+919087654321" className="flex items-center gap-4 py-3 hover:bg-orange-50 rounded-xl px-4 transition">
+                  <a href="tel:+919492691010" className="flex items-center gap-4 py-3 hover:bg-orange-50 rounded-xl px-4 transition">
                     <Phone className="w-6 h-6 text-orange-500" />
-                    <div><p className="font-bold text-sm">+91 90876 54321</p><p className="text-xs text-orange-500">Call us 24/7</p></div>
+                    <div><p className="font-bold text-sm">+91 94926 91010</p><p className="text-xs text-orange-500">Call us 24/7</p></div>
                   </a>
                 </motion.div>
               </motion.div>

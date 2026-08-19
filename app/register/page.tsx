@@ -208,7 +208,7 @@ function RegisterForm() {
       const sessionRes = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken: tokens.accessToken }),
+        body: JSON.stringify({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }),
       });
       if (!sessionRes.ok) throw new Error("Failed to store session");
 
@@ -239,17 +239,23 @@ function RegisterForm() {
       });
 
       if (isOwnerIntent) {
-        // SSO handoff: pass real JWT to partner portal so the owner lands
-        // already authenticated on Step 1 of the 7-step onboarding.
-        // The portal clears these params from the URL immediately on mount.
-        const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3001";
-        const sso = new URLSearchParams({
-          at: tokens.accessToken,
-          rt: tokens.refreshToken,
-          ph: phone,               // verified phone from OTP step
-          em: data.email,
+        // SSO handoff via one-time code — tokens never appear in the URL.
+        // The partner portal redeems the code server-to-server via GET /api/sso/handoff?code=<uuid>.
+        const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
+        // Phone/email travel inside the server-side handoff payload, NOT the URL,
+        // so no PII lands in browser history / access logs / Referer.
+        const handoff = await fetch("/api/sso/handoff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            phone,
+            email: data.email,
+          }),
         });
-        window.location.href = `${PORTAL}/sso?${sso.toString()}`;
+        const { code } = await handoff.json();
+        window.location.href = `${PORTAL}/sso?code=${encodeURIComponent(code)}`;
       } else {
         window.location.href = "/hotels";
       }

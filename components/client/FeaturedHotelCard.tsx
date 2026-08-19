@@ -126,7 +126,7 @@ export default function FeaturedHotelCard(vm: HotelCardViewModel) {
             {vm.priceSlots.map((slot, i) => (
               <div key={slot.label} className="bg-white border border-orange-100 rounded-lg px-2.5 py-1 min-w-[72px] text-center hover:bg-orange-50 transition-colors cursor-pointer flex-shrink-0">
                 <div className="text-sm font-bold text-orange-700">{slot.price}</div>
-                {i === 0 && (
+                {i === 0 && vm.originalPriceLabel && (
                   <div className="text-[8px] text-gray-400 line-through">{vm.originalPriceLabel}</div>
                 )}
                 <div className="text-[8px] font-bold text-gray-400 uppercase tracking-tight">{slot.label}</div>

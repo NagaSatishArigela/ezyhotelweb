@@ -14,10 +14,15 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { accessToken } = await req.json();
+  const { accessToken, refreshToken } = await req.json();
 
   if (!accessToken || typeof accessToken !== "string") {
     return NextResponse.json({ error: "accessToken required" }, { status: 400 });
+  }
+
+  const valid = await verifyAccessToken(accessToken);
+  if (!valid) {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
   const res = NextResponse.json({ ok: true });
@@ -28,11 +33,23 @@ export async function POST(req: NextRequest) {
     path: "/",
     maxAge: 900, // 15 min — matches backend access token expiry
   });
+  // Persist the refresh token httpOnly so a page reload can silently recover a
+  // live session (see /api/auth/refresh). Never exposed to JS → XSS-safe.
+  if (typeof refreshToken === "string" && refreshToken) {
+    res.cookies.set("pph_refresh", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days — matches backend refresh token expiry
+    });
+  }
   return res;
 }
 
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });
   res.cookies.delete("pph_session");
+  res.cookies.delete("pph_refresh");
   return res;
 }

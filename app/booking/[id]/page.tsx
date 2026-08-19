@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams, notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Clock, BedDouble, Users, CalendarDays, ChevronRight, ShieldCheck, Tag, CreditCard } from "lucide-react";
@@ -21,6 +21,9 @@ export default function BookingPage() {
       </Suspense>
     );
   }
+
+  // Demo (numeric-id) booking flow is dev-only; never expose it in production.
+  if (process.env.NODE_ENV === "production") notFound();
 
   return <Suspense fallback={<div className="min-h-screen bg-[#F8F9FA] animate-pulse" />}><BookingPageInner /></Suspense>;
 }
@@ -206,7 +209,7 @@ function BookingPageInner() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
               <h3 className="font-bold text-gray-900 flex items-center gap-2"><Tag className="w-4 h-4 text-orange-500" /> Promo Code</h3>
               <div className="flex gap-2">
-                <input value={promoCode} onChange={(e) => setPromoCode(e.target.value.toUpperCase())} placeholder="Enter code (e.g. PPH10)" className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 bg-gray-50 uppercase font-bold tracking-wider" />
+                <input value={promoCode} onChange={(e) => setPromoCode(e.target.value.toUpperCase())} placeholder="Enter code (e.g. EZY10)" className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-orange-400 bg-gray-50 uppercase font-bold tracking-wider" />
                 <button onClick={applyPromo} disabled={promoValidating} className="px-5 py-2.5 bg-orange-500 text-white font-bold rounded-xl text-sm hover:bg-orange-600 transition-colors disabled:opacity-60">{promoValidating ? "…" : "Apply"}</button>
               </div>
               {promoError && <p className="text-xs text-red-500 font-medium">{promoError}</p>}

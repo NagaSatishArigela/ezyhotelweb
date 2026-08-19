@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useEffect, useState, useMemo, Suspense } from "react";
+import { useParams, useSearchParams, notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import QRCode from "react-qr-code";
@@ -17,9 +17,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 function generateICS(params: { title: string; location: string; start: Date; end: Date; description: string }): string {
   const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   return [
-    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PayPerHour//Booking//EN",
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//EzyHotels//Booking//EN",
     "BEGIN:VEVENT",
-    `UID:${Date.now()}@payperhour.in`,
+    `UID:${Date.now()}@ezyhotels.com`,
     `DTSTAMP:${fmt(new Date())}`,
     `DTSTART:${fmt(params.start)}`,
     `DTEND:${fmt(params.end)}`,
@@ -45,8 +45,12 @@ function BookingConfirmInner() {
     return <RealBookingConfirm bookingId={id} />;
   }
 
+  // Demo (numeric-id) confirmation is dev-only; never render it in production.
+  if (process.env.NODE_ENV === "production") notFound();
+
   const hotel = hotelsData.find((h) => h.id === Number(id));
-  const bookingRef = sp.get("ref") ?? `PPH${Date.now().toString().slice(-8)}`;
+  const stableRef = useMemo(() => `EZY${Math.random().toString(36).slice(2, 10).toUpperCase()}`, []);
+  const bookingRef = sp.get("ref") ?? stableRef;
   const total = sp.get("total") ?? "0";
   const date = sp.get("date") ?? "";
   const time = sp.get("time") ?? "12:00 PM";
@@ -65,7 +69,7 @@ function BookingConfirmInner() {
   const handleShare = async () => {
     const text = `My booking at ${hotel?.name ?? "Hotel"} is confirmed!\nRef: ${bookingRef}\nCheck-in: ${fmt(checkIn)}\nCheck-out: ${fmt(checkOut)}`;
     if (navigator.share) {
-      try { await navigator.share({ title: "Booking Confirmed — PayPerHour", text }); } catch { /* user dismissed */ }
+      try { await navigator.share({ title: "Booking Confirmed — EzyHotels.com", text }); } catch { /* user dismissed */ }
     } else {
       await navigator.clipboard.writeText(text);
       alert("Booking details copied to clipboard!");
@@ -74,7 +78,7 @@ function BookingConfirmInner() {
 
   const handleAddToCalendar = () => {
     const ics = generateICS({
-      title: `Stay at ${hotel?.name ?? "Hotel"} — PayPerHour`,
+      title: `Stay at ${hotel?.name ?? "Hotel"} — EzyHotels.com`,
       location: hotel ? `${hotel.area}, ${hotel.city}` : "",
       start: checkIn,
       end: checkOut,
@@ -127,8 +131,8 @@ function BookingConfirmInner() {
                 <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                   <MapPin className="w-3 h-3 text-orange-500" /> {hotel.area}, {hotel.city}
                 </p>
-                <a href="tel:+919087654321" className="text-xs text-orange-600 font-bold flex items-center gap-1 mt-1 hover:underline">
-                  <Phone className="w-3 h-3" /> +91 90876 54321
+                <a href="tel:+919492691010" className="text-xs text-orange-600 font-bold flex items-center gap-1 mt-1 hover:underline">
+                  <Phone className="w-3 h-3" /> +91 94926 91010
                 </a>
               </div>
             </div>
@@ -173,7 +177,7 @@ function BookingConfirmInner() {
             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Show this at check-in</p>
             <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
               <QRCode
-                value={`PPH:${bookingRef}:${hotel?.id ?? id}:${date}:${hours}`}
+                value={`EZY:${bookingRef}:${hotel?.id ?? id}:${date}:${hours}`}
                 size={128}
                 level="M"
               />

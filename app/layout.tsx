@@ -5,6 +5,8 @@ import { StoreProvider } from "@/components/client/StoreProvider";
 import { Header } from "@/components/client/Header";
 import { ToastProvider } from "@/components/client/Toast";
 import BackToTop from "@/components/client/BackToTop";
+import { AuthRestorer } from "@/components/client/AuthRestorer";
+import { AuthRefresher } from "@/components/client/AuthRefresher";
 
 // 3 weights only — removes ~80KB of font data vs 5 weights
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -19,16 +21,17 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#f97316",
+  themeColor: "#F05A00",
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ezyhotels.com"),
   title: {
-    template: "%s | PayPerHour",
-    default: "PayPerHour — Book Hotels by the Hour",
+    template: "%s | EzyHotels.com",
+    default: "EzyHotels.com — Book Hotels by the Hour. Pay Less, Stay More",
   },
-  description: "Flexible hotel bookings by the hour. Pay only for what you use.",
-  openGraph: { siteName: "PayPerHour", type: "website" },
+  description: "Flexible hotel bookings by the hour. Pay Less, Stay More — pay only for the hours you use.",
+  openGraph: { siteName: "EzyHotels.com", type: "website" },
   // Explicit robots for indexability
   robots: { index: true, follow: true },
 };
@@ -48,6 +51,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="min-h-full flex flex-col">
         <StoreProvider>
+          <AuthRestorer />
+          <AuthRefresher />
           <ToastProvider>
             <Header />
             {children}

@@ -47,13 +47,16 @@ async function fetchRealProperties(params: FilterParams) {
 }
 
 export async function buildHotelsPageViewModel(params: FilterParams): Promise<HotelsPageViewModel> {
-  const filtered = filterHotels(params);
   const realProperties = await fetchRealProperties(params);
 
+  // Demo data is shown only in development. In production, only real approved
+  // properties returned by the backend are shown — never fallback demo data.
+  const demoItems = process.env.NODE_ENV !== "production" ? filterHotels(params) : [];
+
   return {
-    viewModels: [...realProperties.map(toRealPropertyCardViewModel), ...filtered.map(toHotelCardViewModel)],
+    viewModels: [...realProperties.map(toRealPropertyCardViewModel), ...demoItems.map(toHotelCardViewModel)],
     activeFilters: params,
-    totalCount: filtered.length + realProperties.length,
+    totalCount: realProperties.length + demoItems.length,
   };
 }
 

@@ -1,9 +1,9 @@
 import Image from "next/image";
 
 const testimonialsData = [
-  { id: 1, name: "Sarah M.", role: "Anniversary Getaway", text: "PayPerHour made our anniversary getaway so easy and affordable! Booking a room for just a few hours was exactly what we needed.", imageUrl: "https://i.pravatar.cc/150?u=sarah" },
+  { id: 1, name: "Sarah M.", role: "Anniversary Getaway", text: "EzyHotels made our anniversary getaway so easy and affordable! Booking a room for just a few hours was exactly what we needed.", imageUrl: "https://i.pravatar.cc/150?u=sarah" },
   { id: 2, name: "David L.", role: "Business Traveler", text: "Perfect for my business trips. I often need a room for a day-use to freshen up before a meeting. Quick and convenient.", imageUrl: "https://i.pravatar.cc/150?u=david" },
-  { id: 3, name: "Emily R.", role: "Transit Passenger", text: "I needed a place to rest during my long layover, and PayPerHour was an absolute lifesaver! Much better than the airport lounge.", imageUrl: "https://i.pravatar.cc/150?u=emily" },
+  { id: 3, name: "Emily R.", role: "Transit Passenger", text: "I needed a place to rest during my long layover, and EzyHotels was an absolute lifesaver! Much better than the airport lounge.", imageUrl: "https://i.pravatar.cc/150?u=emily" },
 ];
 
 export function Testimonials() {

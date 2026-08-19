@@ -5,11 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import { Briefcase, User, Phone, Building2, Menu, CalendarDays } from "lucide-react";
+import { User, Phone, Building2, Menu, CalendarDays } from "lucide-react";
+import { EzyLogo } from "@/components/brand/EzyLogo";
 import { useAuthState } from "@/modules/auth/hooks/useAuthState";
 import { useAppSelector } from "@/store/hooks";
 import { selectRole } from "@/store/selectors/authSelectors";
-import { selectOnboardingStatus, selectCompletedSteps } from "@/store/selectors/onboardingSelectors";
+
+// Owner operations live in the partner portal (a separate origin), not in this
+// guest storefront — /owner/* routes were removed.
+const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
 
 // framer-motion only loads when menu opens — keeps it out of the initial bundle
 const MobileDrawer = dynamic(() => import("@/components/client/MobileDrawer"), { ssr: false });
@@ -26,20 +30,12 @@ const cityLandmarks: Record<string, string> = {
 
 const cities = ["Bangalore", "Chennai", "Delhi", "Gurgaon", "Hyderabad", "Mumbai", "Pune"];
 
-const STEP_HREFS: Record<number, string> = {
-  1: "/owner/onboarding/basics", 2: "/owner/onboarding/location",
-  3: "/owner/onboarding/rooms", 4: "/owner/onboarding/photos", 5: "/owner/onboarding/legal",
-};
-const POST_SUBMIT_STATUSES = ["submitted", "under_review", "revision_requested", "approved", "rejected"];
-
 function useListPropertyHref() {
   const role = useAppSelector(selectRole);
-  const status = useAppSelector(selectOnboardingStatus);
-  const completedSteps = useAppSelector(selectCompletedSteps);
   if (role !== "owner") return { href: "/register?intent=owner", label: "List your property", sub: "Start earning in 30 mins" };
-  if (POST_SUBMIT_STATUSES.includes(status)) return { href: "/owner/dashboard", label: "My Property", sub: "View listing status" };
-  const nextStep = [1, 2, 3, 4, 5].find((s) => !completedSteps.includes(s)) ?? 1;
-  return { href: STEP_HREFS[nextStep], label: "Continue listing", sub: `Resume from Step ${nextStep}` };
+  // Owners manage listings in the partner portal — link there instead of the
+  // removed /owner/* routes (which proxy.ts bounces to /register → loop).
+  return { href: `${PORTAL_URL}/login`, label: "My Property", sub: "Go to partner portal" };
 }
 
 function TopBar() {
@@ -60,19 +56,11 @@ function TopBar() {
     <>
       <div className="border-b border-orange-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <h1 className="text-3xl font-black tracking-tight text-orange-500 italic hover:text-orange-600 transition-colors">PAYPERHOUR</h1>
+          <Link href="/" className="flex items-center" aria-label="EzyHotels.com home">
+            <EzyLogo />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="#" className="flex items-center gap-3 group hover:bg-orange-100 px-4 py-2 rounded-xl transition-all">
-              <Briefcase className="w-6 h-6 text-orange-500 group-hover:scale-110 transition-transform" />
-              <div className="text-left">
-                <p className="text-sm font-bold text-gray-800">PayPerHour for Business</p>
-                <p className="text-xs text-orange-500">Trusted by 5000+ Corporates</p>
-              </div>
-            </a>
-
             <Link href={listPropertyHref} className="flex items-center gap-3 group hover:bg-orange-100 px-4 py-2 rounded-xl transition-all">
               <Building2 className="w-6 h-6 text-orange-500 group-hover:scale-110 transition-transform" />
               <div className="text-left">
@@ -81,9 +69,9 @@ function TopBar() {
               </div>
             </Link>
 
-            <a href="tel:+919087654321" className="flex items-center gap-2 hover:text-orange-600 transition-colors group">
+            <a href="tel:+919492691010" className="flex items-center gap-2 hover:text-orange-600 transition-colors group">
               <Phone className="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" />
-              <span className="font-bold text-orange-600">+91 90876 54321</span>
+              <span className="font-bold text-orange-600">+91 94926 91010</span>
             </a>
 
             {user ? (

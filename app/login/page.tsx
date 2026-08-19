@@ -35,6 +35,12 @@ function LoginForm() {
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const role = useSelector(selectRole);
 
+  // Honor ?redirect=<path> (e.g. set by the booking flow), but only allow
+  // same-site absolute paths — never an external URL (open-redirect guard).
+  const rawRedirect = searchParams.get("redirect");
+  const safeRedirect = rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : null;
+  const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
+
   // Already logged in — redirect away from login page.
   // Persisted auth state (localStorage) can be stale relative to the httpOnly
   // pph_session cookie the proxy actually checks, so verify it first — otherwise
@@ -47,7 +53,8 @@ function LoginForm() {
       .then((data: { valid: boolean }) => {
         if (cancelled) return;
         if (data.valid) {
-          window.location.href = role === "owner" ? "/owner/onboarding/basics" : "/hotels";
+          // Owners belong in the partner portal; /owner/* routes were removed.
+          window.location.href = role === "owner" ? `${PORTAL_URL}/login` : (safeRedirect ?? "/hotels");
         } else {
           dispatch(clearUser());
           clearAuth();
@@ -60,7 +67,7 @@ function LoginForm() {
         if (!cancelled) { dispatch(clearUser()); clearAuth(); }
       });
     return () => { cancelled = true; };
-  }, [isAuthenticated, role, dispatch]);
+  }, [isAuthenticated, role, dispatch, safeRedirect, PORTAL_URL]);
 
   // Shown when redirected from /register after existing phone detected
   const existingAccount = searchParams.get("existing") === "1";
@@ -79,7 +86,7 @@ function LoginForm() {
       const sessionRes = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessToken: tokens.accessToken }),
+        body: JSON.stringify({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }),
       });
       if (!sessionRes.ok) throw new Error("Failed to store session");
 
@@ -109,7 +116,7 @@ function LoginForm() {
       });
 
       success("Welcome back!");
-      window.location.href = "/";
+      window.location.href = safeRedirect ?? "/";
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Login failed. Check your credentials.";
       setFieldError(msg);

@@ -18,9 +18,12 @@ if (typeof window !== "undefined") {
   try {
     const rawAuth = localStorage.getItem("pph_auth");
     if (rawAuth) {
-      const { user, role, accessToken, refreshToken } = JSON.parse(rawAuth);
+      const { user, role } = JSON.parse(rawAuth);
       if (user && role) {
-        store.dispatch(setUser({ user, role, accessToken: accessToken ?? "", refreshToken: refreshToken ?? "" }));
+        // Tokens are never persisted to localStorage (XSS protection).
+        // AuthRestorer will call GET /api/auth/me to recover the token from
+        // the httpOnly pph_session cookie on the first render after reload.
+        store.dispatch(setUser({ user, role, accessToken: "", refreshToken: "" }));
       }
     }
     const rawOnboarding = localStorage.getItem("pph_onboarding");
@@ -39,8 +42,6 @@ if (typeof window !== "undefined") {
         localStorage.setItem("pph_auth", JSON.stringify({
           user: auth.user,
           role: auth.role,
-          accessToken: auth.accessToken,
-          refreshToken: auth.refreshToken,
         }));
         localStorage.setItem("pph_onboarding", JSON.stringify({
           draftId: onboarding.draftId,

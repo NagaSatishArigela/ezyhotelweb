@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/login", "/register", "/booking/", "/my-bookings", "/profile", "/sso"],
       },
     ],
-    sitemap: "https://payperhour.in/sitemap.xml",
+    sitemap: "https://ezyhotels.com/sitemap.xml",
   };
 }

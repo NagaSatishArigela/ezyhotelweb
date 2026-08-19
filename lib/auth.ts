@@ -2,10 +2,14 @@ import { SignJWT, jwtVerify, type JWTPayload as JosePayload } from "jose";
 import type { User } from "@/types";
 import type { UserRole } from "@/store/authSlice";
 
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (!val) throw new Error(`Missing required environment variable: ${name}`);
+  return val;
+}
+
 // Evaluated once at module load — avoids per-call TextEncoder allocation
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "dev-secret-minimum-32-chars-change-in-prod"
-);
+const JWT_SECRET = new TextEncoder().encode(requireEnv("JWT_SECRET"));
 
 export interface JWTPayload {
   userId: number;

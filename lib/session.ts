@@ -1,9 +1,12 @@
 import { jwtVerify } from "jose";
 
-// Must match the backend JWT_ACCESS_SECRET env var
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "change-me-access-secret-at-least-32-chars"
-);
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (!val) throw new Error(`Missing required environment variable: ${name}`);
+  return val;
+}
+
+const JWT_SECRET = new TextEncoder().encode(requireEnv("JWT_SECRET"));
 
 export async function verifyAccessToken(token: string): Promise<boolean> {
   try {

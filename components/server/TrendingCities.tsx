@@ -3,10 +3,10 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const cities = [
-  { name: "New York", price: "Starts at $55 / 3h", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=800" },
-  { name: "London", price: "Starts at £45 / 3h", image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&q=80&w=800" },
-  { name: "Dubai", price: "Starts at AED 150 / 3h", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&q=80&w=800" },
-  { name: "Paris", price: "Starts at €50 / 3h", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=800" },
+  { name: "Mumbai", price: "Starts at ₹499 / 3h", image: "https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?auto=format&fit=crop&q=80&w=800" },
+  { name: "Delhi", price: "Starts at ₹399 / 3h", image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&q=80&w=800" },
+  { name: "Bengaluru", price: "Starts at ₹349 / 3h", image: "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?auto=format&fit=crop&q=80&w=800" },
+  { name: "Hyderabad", price: "Starts at ₹299 / 3h", image: "https://images.unsplash.com/photo-1551161242-b5af797b7233?auto=format&fit=crop&q=80&w=800" },
 ];
 
 export function TrendingCities() {

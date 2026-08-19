@@ -37,10 +37,6 @@ export default function TourismMap({ lat = 18.922, lng = 72.8347, hotelName }: T
   useEffect(() => { fixLeafletIcons(); }, []);
 
   const position: [number, number] = [lat, lng];
-  const nearbyPlaces = [
-    { name: "Local Attraction", lat: lat + 0.002, lng: lng + 0.002, type: "Attraction" },
-    { name: "City Mall", lat: lat - 0.002, lng: lng - 0.001, type: "Shopping" },
-  ];
 
   return (
     <MapContainer center={position} zoom={14} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
@@ -48,19 +44,12 @@ export default function TourismMap({ lat = 18.922, lng = 72.8347, hotelName }: T
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
+      {/* Only the real property marker — no fabricated "nearby" POIs. */}
       <Marker position={position} icon={hotelIcon}>
         <Popup>
           <div className="font-bold text-sm">{hotelName}</div>
         </Popup>
       </Marker>
-      {nearbyPlaces.map((place, i) => (
-        <Marker key={i} position={[place.lat, place.lng]}>
-          <Popup>
-            <div className="text-sm font-bold">{place.name}</div>
-            <div className="text-xs text-gray-500">{place.type}</div>
-          </Popup>
-        </Marker>
-      ))}
     </MapContainer>
   );
 }

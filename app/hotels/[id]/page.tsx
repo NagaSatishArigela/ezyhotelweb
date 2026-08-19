@@ -12,7 +12,7 @@ import HotelLocationMap from "@/components/client/HotelLocationMap";
 import { publicPropertiesApi, ApiError } from "@/lib/api";
 import RealPropertyDetail from "./RealPropertyDetail";
 
-const BASE = "https://payperhour.in";
+const BASE = "https://ezyhotels.com";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -21,6 +21,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
+  // Demo hotels (with fabricated ratings/reviews) must never be pre-built into
+  // the production bundle — only real backend properties ship to prod.
+  if (process.env.NODE_ENV === "production") return [];
   return hotelsData.map((h) => ({ id: String(h.id) }));
 }
 
@@ -31,8 +34,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     try {
       const property = await publicPropertiesApi.getById(id);
       return {
-        title: `${property.name} — Book by the Hour | PayPerHour`,
-        description: property.description ?? `Book ${property.name} on PayPerHour.`,
+        title: `${property.name} — Book by the Hour`,
+        description: property.description ?? `Book ${property.name} on EzyHotels.com.`,
       };
     } catch {
       return { title: "Property Not Found" };
@@ -42,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const hotel = hotelsData.find((h) => h.id === Number(id));
   if (!hotel) return { title: "Hotel Not Found" };
   return {
-    title: `${hotel.name} — Book by the Hour | PayPerHour`,
+    title: `${hotel.name} — Book by the Hour`,
     description: `Book ${hotel.name} by the hour. Rated ${hotel.rating}/5 by ${hotel.reviews} guests. Amenities: ${hotel.amenities.join(", ")}.`,
   };
 }
@@ -94,6 +97,9 @@ export default async function HotelDetailPage({ params }: PageProps) {
     }
     return <RealPropertyDetail property={property} />;
   }
+
+  // Demo (numeric-id) hotels are dev-only; never render them in production.
+  if (process.env.NODE_ENV === "production") notFound();
 
   const hotel = hotelsData.find((h) => h.id === Number(id));
   if (!hotel) notFound();

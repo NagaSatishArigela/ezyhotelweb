@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-orange: #FF8F00;
-  --color-brand-orange-light: #FEF4EA;
+  /* Brand color (CEO): #F05A00. Components use the Tailwind orange-* scale as
+     the brand family, so the whole scale is reharmonized around orange-600 =
+     #F05A00 (the primary brand stop). */
+  --color-orange-50:  #FEF3EC;
+  --color-orange-100: #FDE4D3;
+  --color-orange-200: #FBC9A5;
+  --color-orange-300: #F9A870;
+  --color-orange-400: #F5823D;
+  --color-orange-500: #F26A1B;
+  --color-orange-600: #F05A00;
+  --color-orange-700: #C74800;
+  --color-orange-800: #9E3A02;
+  --color-orange-900: #7F2F05;
+
+  --color-brand-orange: #F05A00;
+  --color-brand-orange-light: #FEF3EC;
   --color-brand-black: #0F172A;
   --color-brand-gray: #64748B;
   --color-brand-pale: #F8FAFC;
@@ -19,7 +33,7 @@
 
 @layer utilities {
   .hero-radial-bg {
-    background: radial-gradient(circle, rgba(255, 143, 0, 0.03) 0%, rgba(255, 255, 255, 1) 70%);
+    background: radial-gradient(circle, rgba(240, 90, 0, 0.03) 0%, rgba(255, 255, 255, 1) 70%);
   }
 
   .glass-card {

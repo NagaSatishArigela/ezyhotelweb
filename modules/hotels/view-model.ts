@@ -27,7 +27,7 @@ export function toHotelCardViewModel(hotel: Hotel): HotelCardViewModel {
   };
 }
 
-const PLACEHOLDER_IMAGE = "https://placehold.co/800x600?text=PayPerHour";
+const PLACEHOLDER_IMAGE = "https://placehold.co/800x600?text=EzyHotels";
 
 /** Maps a real (Postgres-backed) property from /properties/public to the shared card view model. */
 export function toRealPropertyCardViewModel(property: PublicPropertySummary): HotelCardViewModel {
@@ -35,7 +35,6 @@ export function toRealPropertyCardViewModel(property: PublicPropertySummary): Ho
     property.startingHourlyRatePaise != null ? Math.round(property.startingHourlyRatePaise / 100) : null;
   const fulldayRupees =
     property.startingFulldayRatePaise != null ? Math.round(property.startingFulldayRatePaise / 100) : null;
-  const basePrice = hourlyRupees ?? fulldayRupees ?? 0;
 
   return {
     id: property.id,
@@ -43,7 +42,9 @@ export function toRealPropertyCardViewModel(property: PublicPropertySummary): Ho
     city: property.city ?? "",
     location: [property.area, property.city].filter(Boolean).join(", "),
     priceLabel: hourlyRupees != null ? `₹${hourlyRupees}/hr` : "Contact for price",
-    originalPriceLabel: `₹${Math.round(basePrice * 1.4)}`,
+    // No fabricated strike-through "original" price for real listings — the
+    // booking flow never honors a discount, so only truthful rates are shown.
+    originalPriceLabel: "",
     ratingLabel: "New",
     reviewsLabel: "New listing",
     amenityBadges: property.amenities.slice(0, 3),
@@ -53,12 +54,13 @@ export function toRealPropertyCardViewModel(property: PublicPropertySummary): Ho
     bookingPolicy: property.bookingPolicy === "fullday" ? "24h" : "hourly",
     priceSlots: [
       { label: "3 Hrs", price: hourlyRupees != null ? `₹${hourlyRupees * 3}` : "—" },
-      { label: "6 Hrs", price: hourlyRupees != null ? `₹${Math.round(hourlyRupees * 6 * 0.9)}` : "—" },
+      // Truthful multiple of the hourly rate — no invented "10% off".
+      { label: "6 Hrs", price: hourlyRupees != null ? `₹${hourlyRupees * 6}` : "—" },
       {
         label: "24 Hrs",
         price: fulldayRupees != null ? `₹${fulldayRupees}` : hourlyRupees != null ? `₹${hourlyRupees * 24}` : "—",
       },
     ],
-    description: property.description ?? "A PayPerHour partner property offering comfortable, flexible stays.",
+    description: property.description ?? "An EzyHotels partner property offering comfortable, flexible stays.",
   };
 }

@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 // ── Request helper ──────────────────────────────────────────────────────────
 
@@ -444,7 +444,8 @@ export type BookingStatus =
   | "checked_in"
   | "completed"
   | "cancelled"
-  | "no_show";
+  | "no_show"
+  | "voided";
 
 export type PaymentStatus = "pending" | "paid" | "refunded" | "failed";
 
@@ -487,12 +488,33 @@ export interface CreateBookingDto {
   checkInAt: string;
   durationHours?: number;
   guestCount: number;
+  guestName?: string;
+  guestPhone?: string;
+  guestEmail?: string;
+  specialRequests?: string;
 }
 
-// POST /bookings/:id/payment/confirm
-export interface PaymentConfirmDto {
-  success: boolean;
-  paymentRef?: string;
+// POST /bookings/:id/payment/order
+export interface PaymentOrder {
+  bookingId: string;
+  bookingRef: string;
+  provider: string;
+  orderId: string;
+  amountPaise: number;
+  keyId: string;
+}
+
+// POST /bookings/:id/payment/simulate (sandbox only)
+export interface SandboxCheckoutResult {
+  paymentId: string;
+  signature: string;
+}
+
+// POST /bookings/:id/payment/verify
+export interface VerifyPaymentDto {
+  orderId: string;
+  paymentId: string;
+  signature: string;
 }
 
 // POST /bookings/:id/cancel
@@ -530,9 +552,22 @@ export const bookingsApi = {
     return request(`/bookings/${bookingId}`, { method: "GET" }, accessToken);
   },
 
-  confirmPayment(accessToken: string, bookingId: string, dto: PaymentConfirmDto): Promise<Booking> {
+  // Layer C payment flow: order → (sandbox) checkout → verify.
+  createPaymentOrder(accessToken: string, bookingId: string): Promise<PaymentOrder> {
+    return request(`/bookings/${bookingId}/payment/order`, { method: "POST" }, accessToken);
+  },
+
+  simulatePayment(accessToken: string, bookingId: string, orderId: string): Promise<SandboxCheckoutResult> {
     return request(
-      `/bookings/${bookingId}/payment/confirm`,
+      `/bookings/${bookingId}/payment/simulate`,
+      { method: "POST", body: JSON.stringify({ orderId }) },
+      accessToken
+    );
+  },
+
+  verifyPayment(accessToken: string, bookingId: string, dto: VerifyPaymentDto): Promise<Booking> {
+    return request(
+      `/bookings/${bookingId}/payment/verify`,
       { method: "POST", body: JSON.stringify(dto) },
       accessToken
     );

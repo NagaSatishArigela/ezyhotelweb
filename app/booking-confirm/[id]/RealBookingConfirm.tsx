@@ -5,10 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   CheckCircle, CalendarDays, Clock,
-  MapPin, Users, Phone, Home, CalendarCheck, LogIn, LogOut, Loader2,
+  MapPin, Users, Phone, Home, CalendarCheck,
 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { ApiError, Booking, PublicPropertyDetail, bookingsApi, publicPropertiesApi } from "@/lib/api";
+// bookingsApi.checkIn / checkOut are staff operations — not exposed to guests here
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken } from "@/store/selectors/authSelectors";
 
@@ -26,7 +27,6 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [show, setShow] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
 
@@ -107,8 +107,8 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
               <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
                 <MapPin className="w-3 h-3 text-orange-500" /> {[property.area, property.city].filter(Boolean).join(", ")}
               </p>
-              <a href="tel:+919087654321" className="text-xs text-orange-600 font-bold flex items-center gap-1 mt-1 hover:underline">
-                <Phone className="w-3 h-3" /> +91 90876 54321
+              <a href="tel:+919492691010" className="text-xs text-orange-600 font-bold flex items-center gap-1 mt-1 hover:underline">
+                <Phone className="w-3 h-3" /> +91 94926 91010
               </a>
             </div>
           </div>
@@ -149,7 +149,7 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
           <div className="p-5 flex flex-col items-center gap-3">
             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Show this at check-in</p>
             <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-              <QRCode value={booking.qrCode ?? `PPH:${booking.bookingRef}:${booking.propertyId}`} size={128} level="M" />
+              <QRCode value={booking.qrCode ?? `EZY:${booking.bookingRef}:${booking.propertyId}`} size={128} level="M" />
             </div>
             <p className="text-[10px] text-gray-400 font-medium">{booking.bookingRef}</p>
           </div>
@@ -162,47 +162,13 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
           <p>• Arrive within 30 mins of check-in time to hold room</p>
         </div>
 
-        {/* Check-in / Check-out actions */}
+        {/* Status badge — check-in/check-out is a staff operation at the front desk */}
         {(booking.status === "confirmed" || booking.status === "checked_in") && (
           <div className={`mb-3 transition-all duration-500 delay-250 ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-            {booking.status === "confirmed" && booking.qrCode && (
-              <button
-                onClick={async () => {
-                  if (!accessToken) return;
-                  setActionLoading(true);
-                  try {
-                    const updated = await bookingsApi.checkIn(accessToken, bookingId, booking.qrCode!);
-                    setBooking(updated);
-                  } catch (e) {
-                    alert(e instanceof ApiError ? e.message : "Check-in failed");
-                  } finally { setActionLoading(false); }
-                }}
-                disabled={actionLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors text-sm disabled:opacity-60"
-              >
-                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
-                Check-in now
-              </button>
-            )}
-            {booking.status === "checked_in" && (
-              <button
-                onClick={async () => {
-                  if (!accessToken) return;
-                  setActionLoading(true);
-                  try {
-                    const updated = await bookingsApi.checkOut(accessToken, bookingId);
-                    setBooking(updated);
-                  } catch (e) {
-                    alert(e instanceof ApiError ? e.message : "Check-out failed");
-                  } finally { setActionLoading(false); }
-                }}
-                disabled={actionLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors text-sm disabled:opacity-60"
-              >
-                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-                Check-out
-              </button>
-            )}
+            <div className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold border ${booking.status === "checked_in" ? "bg-blue-50 border-blue-200 text-blue-700" : "bg-green-50 border-green-200 text-green-700"}`}>
+              <CheckCircle className="w-4 h-4" />
+              {booking.status === "checked_in" ? "Checked in — enjoy your stay!" : "Show QR code at front desk to check in"}
+            </div>
           </div>
         )}
 

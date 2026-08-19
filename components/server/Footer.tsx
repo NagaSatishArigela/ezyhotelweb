@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { EzyMark } from "@/components/brand/EzyLogo";
 
 const socials = [
   { name: "Facebook", bg: "bg-[#1877F2]", svg: <path fill="currentColor" d="M9.198 21.5h4v-8.01h3.604l.396-3.98h-4V7.5a1 1 0 0 1 1-1h3v-4h-3a5 5 0 0 0-5 5v2.01h-2l-.396 3.98h2.396v8.01Z" /> },
@@ -17,14 +17,15 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-6">
-              <div className="bg-brand-orange p-1.5 rounded-lg">
-                <Clock className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-xl font-extrabold tracking-tight">PayPerHour</span>
+              <EzyMark size={34} dark />
+              <span className="text-xl font-extrabold tracking-tight">
+                <span className="text-brand-orange">Ezy</span>Hotels
+                <span className="text-brand-orange">.com</span>
+              </span>
             </Link>
-            <p className="text-gray-400 font-medium leading-relaxed mb-4">Stay Smart. Pay Less.</p>
+            <p className="text-gray-300 font-semibold leading-relaxed mb-4">Pay Less, Stay More.</p>
             <p className="text-sm text-gray-500">
-              Download Payperhour today and experience a flexible, affordable, and modern way to book hotels.
+              Book hotels by the hour with EzyHotels.com — a flexible, affordable, and modern way to stay.
             </p>
           </div>
 
@@ -43,8 +44,8 @@ export function Footer() {
             <ul className="space-y-4 text-gray-400 font-medium">
               <li><a href="#" className="hover:text-brand-orange transition-colors">Help Center / FAQ</a></li>
               <li><a href="#" className="hover:text-brand-orange transition-colors">Contact Us</a></li>
-              <li><a href="#" className="hover:text-brand-orange transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-brand-orange transition-colors">Privacy Policy</a></li>
+              <li><Link href="/terms" className="hover:text-brand-orange transition-colors">Terms of Service</Link></li>
+              <li><Link href="/privacy" className="hover:text-brand-orange transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
@@ -66,7 +67,7 @@ export function Footer() {
 
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-gray-500 text-sm font-medium">
-            © 2024 PayPerHour. All rights reserved. Built with ❤️ for travelers.
+            © 2026 EzyHotels.com. All rights reserved. Built with ❤️ for travelers.
           </p>
           <div className="flex gap-3">
             {socials.map((social) => (
