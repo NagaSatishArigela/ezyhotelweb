@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export type PropertyType = "hotel" | "resort" | "homestay" | "villa" | "pg" | "farm" | "banquet" | "other";
 export type BookingPolicy = "hourly" | "fullday" | "both";
-// Mirrors PropertyStatus in quicknestserver's prisma/schema.prisma
+// Mirrors PropertyStatus in ezyhotelsserver's prisma/schema.prisma
 export type OnboardingStatus = "draft" | "pending_review" | "needs_revision" | "approved" | "rejected" | "suspended";
 
 interface OnboardingState {
