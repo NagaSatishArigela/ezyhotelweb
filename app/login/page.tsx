@@ -12,6 +12,9 @@ import { useToast } from "@/components/client/Toast";
 import { authApi, ApiError } from "@/lib/api";
 import { clearAuth, saveAuthImmediate } from "@/lib/persist";
 
+const DEV_LOGIN_EMAIL = "dev@example.com";
+const DEV_LOGIN_PASSWORD = "Dev@12345";
+
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -20,6 +23,10 @@ const GoogleIcon = () => (
     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
   </svg>
 );
+
+function isDevMode() {
+  return process.env.NODE_ENV !== "production";
+}
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -46,6 +53,13 @@ function LoginForm() {
   // pph_session cookie the proxy actually checks, so verify it first — otherwise
   // a missing/expired cookie causes an infinite redirect loop with proxy.ts.
   useEffect(() => {
+    if (isDevMode() && !email && !password) {
+      setEmail(DEV_LOGIN_EMAIL);
+      setPassword(DEV_LOGIN_PASSWORD);
+    }
+  }, [email, password]);
+
+  useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
     fetch("/api/session")
@@ -53,8 +67,11 @@ function LoginForm() {
       .then((data: { valid: boolean }) => {
         if (cancelled) return;
         if (data.valid) {
-          // Owners belong in the partner portal; /owner/* routes were removed.
-          window.location.href = role === "owner" ? `${PORTAL_URL}/login` : (safeRedirect ?? "/hotels");
+          const target = safeRedirect ?? `${PORTAL_URL}/login`;
+          const currentUrl = window.location.href;
+          if (!currentUrl.startsWith(target) && currentUrl !== target) {
+            window.location.href = target;
+          }
         } else {
           dispatch(clearUser());
           clearAuth();
@@ -79,8 +96,21 @@ function LoginForm() {
     setIsSubmitting(true);
     dispatch(setLoading(true));
     try {
-      const res = await authApi.login(email, password);
-      const { user, tokens } = res;
+      let result: { user: { email: string }; tokens: { accessToken: string; refreshToken: string } };
+
+      if (isDevMode() && email === DEV_LOGIN_EMAIL && password === DEV_LOGIN_PASSWORD) {
+        result = {
+          user: { email: DEV_LOGIN_EMAIL },
+          tokens: {
+            accessToken: "dev-access-token",
+            refreshToken: "dev-refresh-token",
+          },
+        };
+      } else {
+        result = await authApi.login(email, password);
+      }
+
+      const { user, tokens } = result;
 
       // Store access token in httpOnly cookie for proxy.ts
       const sessionRes = await fetch("/api/session", {
@@ -116,7 +146,10 @@ function LoginForm() {
       });
 
       success("Welcome back!");
-      window.location.href = safeRedirect ?? "/";
+      const target = safeRedirect ?? `${PORTAL_URL}/login`;
+      if (window.location.href !== target) {
+        window.location.href = target;
+      }
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Login failed. Check your credentials.";
       setFieldError(msg);
@@ -201,6 +234,20 @@ function LoginForm() {
               )}
 
               {/* Forgot password not yet implemented in backend */}
+
+              {isDevMode() && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail(DEV_LOGIN_EMAIL);
+                    setPassword(DEV_LOGIN_PASSWORD);
+                    setFieldError("");
+                  }}
+                  className="w-full py-2.5 border border-amber-300 bg-amber-50 text-amber-800 rounded-xl font-semibold text-sm transition hover:bg-amber-100"
+                >
+                  Use Dev Login
+                </button>
+              )}
 
               <button
                 type="submit"
