@@ -3,15 +3,15 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * E2E flow-test skeleton for the M0-M6 module factory loop (Gate 4: E2E Flow
  * Test). Specs live in `e2e/` and exercise the full guest/owner flows against
- * a running Next.js app + ezyhotelsserver API.
+ * a running Next.js app + quicknestserver API.
  *
  * Local usage:
  *   npm run dev               (terminal 1: Next.js on :3000)
- *   cd ../ezyhotelsserver && npm run start:dev   (terminal 2: API on :4000)
+ *   cd ../quicknestserver && npm run start:dev   (terminal 2: API on :4000)
  *   npm run test:e2e           (terminal 3)
  *
  * `webServer` below can auto-start the Next.js dev server for CI; the API
- * server is started separately (see ezyhotelsserver test:e2e for backend
+ * server is started separately (see quicknestserver test:e2e for backend
  * integration tests).
  */
 export default defineConfig({
