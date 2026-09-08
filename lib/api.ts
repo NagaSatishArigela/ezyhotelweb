@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
 
 // ── Request helper ──────────────────────────────────────────────────────────
 
@@ -45,7 +46,7 @@ export class ApiError extends Error {
   }
 }
 
-// ── Response types (matching quicknestserver contract) ─────────────────────
+// ── Response types (matching ezyhotelsserver contract) ─────────────────────
 
 export interface AuthTokens {
   accessToken: string;
@@ -72,6 +73,7 @@ export interface SendOtpResponse {
   message: string;
   expiresIn: number;
   resendAfter: number;
+  otp?: string;
 }
 
 // POST /auth/verify-otp — two possible shapes
@@ -173,131 +175,6 @@ export const authApi = {
       { method: "POST", body: JSON.stringify({ refreshToken }) },
       accessToken
     );
-  },
-};
-
-// ── Properties (owner onboarding) API ───────────────────────────────────────
-
-export type PropertyStatus =
-  | "draft"
-  | "pending_review"
-  | "needs_revision"
-  | "approved"
-  | "rejected"
-  | "suspended";
-
-// Mirrors Prisma's DocumentType enum (compliance schema)
-export type DocumentType =
-  | "owner_photo"
-  | "id_proof"
-  | "pan_card"
-  | "gstin_certificate"
-  | "rental_agreement"
-  | "fire_safety_cert"
-  | "fssai_license"
-  | "trade_license"
-  | "other";
-
-export interface PropertyDocumentWizardDto {
-  type: DocumentType;
-  url: string;
-  expiresAt?: string;
-}
-
-export interface ComplianceDocumentSummary {
-  type: string;
-  status: string;
-  expiresAt: string | null;
-}
-
-export interface ComplianceSummary {
-  legalBusinessName: string;
-  gstinMasked: string;
-  panMasked: string;
-  bankAccountNumberMasked: string;
-  ifsc: string;
-  accountHolderName: string;
-  documents: ComplianceDocumentSummary[];
-}
-
-// POST /properties/draft
-export interface CreateDraftResult {
-  propertyId: string;
-}
-
-// GET /properties/:id/draft
-export interface DraftView {
-  propertyId: string;
-  status: PropertyStatus;
-  draftStep: number | null;
-  draftData: Record<string, unknown>;
-  compliance: ComplianceSummary | null;
-}
-
-// PATCH /properties/:id/step/:stepNum
-export interface SaveStepResult {
-  propertyId: string;
-  draftStep: number | null;
-  draftData: Record<string, unknown>;
-  compliance?: ComplianceSummary;
-}
-
-// POST /properties/:id/submit, PATCH /properties/:id/revise
-export interface SubmitResult {
-  propertyId: string;
-  status: PropertyStatus;
-  submissionRef: string;
-  submittedAt: string;
-}
-
-export interface TimelineEntry {
-  label: string;
-  status: "done" | "current" | "pending";
-  at: string | null;
-}
-
-// GET /properties/:id/status
-export interface StatusView {
-  status: PropertyStatus;
-  submissionRef: string | null;
-  submittedAt: string | null;
-  revisionCount: number;
-  revisionNotes: unknown;
-  timeline: TimelineEntry[];
-}
-
-export const propertiesApi = {
-  createDraft(accessToken: string): Promise<CreateDraftResult> {
-    return request("/properties/draft", { method: "POST" }, accessToken);
-  },
-
-  getDraft(accessToken: string, propertyId: string): Promise<DraftView> {
-    return request(`/properties/${propertyId}/draft`, { method: "GET" }, accessToken);
-  },
-
-  saveStep(
-    accessToken: string,
-    propertyId: string,
-    stepNum: number,
-    data: object
-  ): Promise<SaveStepResult> {
-    return request(
-      `/properties/${propertyId}/step/${stepNum}`,
-      { method: "PATCH", body: JSON.stringify(data) },
-      accessToken
-    );
-  },
-
-  submit(accessToken: string, propertyId: string): Promise<SubmitResult> {
-    return request(`/properties/${propertyId}/submit`, { method: "POST" }, accessToken);
-  },
-
-  getStatus(accessToken: string, propertyId: string): Promise<StatusView> {
-    return request(`/properties/${propertyId}/status`, { method: "GET" }, accessToken);
-  },
-
-  revise(accessToken: string, propertyId: string): Promise<SubmitResult> {
-    return request(`/properties/${propertyId}/revise`, { method: "PATCH" }, accessToken);
   },
 };
 
