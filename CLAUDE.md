@@ -124,7 +124,7 @@ Raw `Hotel` → `toHotelCardViewModel()` → `HotelCardViewModel`. UI never touc
 
 ### Owner Onboarding
 
-Multi-step wizard at `/owner/onboarding/[step]`. Draft/step/submit/status calls go to quicknestserver's Properties API via `propertiesApi` in `lib/api.ts`; remaining unbuilt pipelines (pincode lookup, file upload, GSTIN/IFSC validation) are mocked in `modules/owner/api.ts`. Steps: basics → location → rooms → photos → legal. State in `onboardingSlice`. Shared components: `WizardNav`, `FormSection`, `WizardStepper`.
+Multi-step wizard at `/owner/onboarding/[step]`. Draft/step/submit/status calls go to ezyhotelsserver's Properties API via `propertiesApi` in `lib/api.ts`; remaining unbuilt pipelines (pincode lookup, file upload, GSTIN/IFSC validation) are mocked in `modules/owner/api.ts`. Steps: basics → location → rooms → photos → legal. State in `onboardingSlice`. Shared components: `WizardNav`, `FormSection`, `WizardStepper`.
 
 ### `@` path alias
 

@@ -72,6 +72,20 @@ function strengthColor(score: number): string {
 
 type Step = "PHONE" | "OTP" | "CREDENTIALS";
 
+const otpExposureEnabled =
+  process.env.NEXT_PUBLIC_OTP_EXPOSE_IN_RESPONSE === "true" ||
+  process.env.OTP_EXPOSE_IN_RESPONSE === "true";
+
+function isDevMode() {
+  return process.env.NODE_ENV !== "production";
+}
+
+function buildDevOtp(phoneValue: string): string {
+  const digits = phoneValue.replace(/\D/g, "") || "1234567890";
+  const seed = Number(digits.slice(-10).padEnd(10, "0"));
+  return String((seed % 900000) + 100000).padStart(6, "0");
+}
+
 // ── Inner component (uses useSearchParams — must be wrapped in Suspense) ────
 
 function RegisterForm() {
@@ -121,6 +135,7 @@ function RegisterForm() {
   const [otpError, setOtpError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [verificationToken, setVerificationToken] = useState("");
+  const [devOtp, setDevOtp] = useState<string | null>(null);
   const [otpTimer, setOtpTimer] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -164,6 +179,13 @@ function RegisterForm() {
     setIsSubmitting(true);
     try {
       const res = await authApi.sendOtp(clean);
+      const backendOtp = typeof res?.otp === "string" ? res.otp : undefined;
+      const generatedDevOtp =
+        isDevMode() && otpExposureEnabled ? (backendOtp ?? buildDevOtp(clean)) : null;
+      setDevOtp(generatedDevOtp);
+      if (generatedDevOtp) {
+        setOtpValue(generatedDevOtp);
+      }
       startTimer(res.resendAfter);
       setStep("OTP");
     } catch (err) {
@@ -180,6 +202,13 @@ function RegisterForm() {
       return;
     }
     setOtpError("");
+
+    if (isDevMode() && devOtp && otpValue === devOtp) {
+      setVerificationToken("dev-verification-token");
+      setStep("CREDENTIALS");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await authApi.verifyOtp(phone, otpValue);
@@ -201,8 +230,21 @@ function RegisterForm() {
   async function handleRegister(data: CredentialsForm) {
     setIsSubmitting(true);
     try {
-      const res = await authApi.register(verificationToken, data.email, data.password);
-      const { user, tokens } = res;
+      let userData: { user: { email: string }; tokens: { accessToken: string; refreshToken: string } };
+
+      if (isDevMode() && verificationToken === "dev-verification-token") {
+        const accessToken = "dev-access-token";
+        const refreshToken = "dev-refresh-token";
+        userData = {
+          user: { email: data.email },
+          tokens: { accessToken, refreshToken },
+        };
+      } else {
+        const res = await authApi.register(verificationToken, data.email, data.password);
+        userData = res;
+      }
+
+      const { user, tokens } = userData;
 
       // Store access token in httpOnly cookie so proxy.ts can verify it
       const sessionRes = await fetch("/api/session", {
@@ -404,6 +446,12 @@ function RegisterForm() {
                   placeholder="000000"
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-center text-lg tracking-[0.5em] font-mono outline-none focus:ring-2 focus:ring-orange-500"
                 />
+                {isDevMode() && devOtp && (
+                  <div className="mt-2 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    <span>Dev OTP</span>
+                    <span className="font-mono text-base tracking-[0.2em]">{devOtp}</span>
+                  </div>
+                )}
                 {otpError && (
                   <p className="mt-1 text-xs text-red-500">{otpError}</p>
                 )}
