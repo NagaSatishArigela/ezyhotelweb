@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
@@ -16,11 +16,10 @@ import {
   Check,
   X,
   Clock,
-  Building2,
   UserCircle2,
 } from "lucide-react";
 import { setUser, clearUser } from "@/store/authSlice";
-import { selectIsAuthenticated, selectRole } from "@/store/selectors/authSelectors";
+import { selectIsAuthenticated } from "@/store/selectors/authSelectors";
 import { authApi, ApiError } from "@/lib/api";
 import { clearAuth, saveAuthImmediate } from "@/lib/persist";
 import { useToast } from "@/components/client/Toast";
@@ -89,19 +88,12 @@ function buildDevOtp(phoneValue: string): string {
 // ── Inner component (uses useSearchParams — must be wrapped in Suspense) ────
 
 function RegisterForm() {
-  const searchParams = useSearchParams();
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { error: toastError } = useToast();
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const role = useSelector(selectRole);
-  const intent = searchParams.get("intent"); // "owner" | null
-
-  const isOwnerIntent = intent === "owner";
 
   // Already logged in — redirect away from register.
-  // intent=owner: any authenticated user goes straight to onboarding (no re-register needed)
-  // no intent: go to hotels
   // Persisted auth state (localStorage) can be stale relative to the httpOnly
   // pph_session cookie the proxy actually checks, so verify it first — otherwise
   // a missing/expired cookie causes an infinite redirect loop with proxy.ts.
@@ -113,7 +105,7 @@ function RegisterForm() {
       .then((data: { valid: boolean }) => {
         if (cancelled) return;
         if (data.valid) {
-          window.location.href = isOwnerIntent ? "/owner/onboarding/basics" : "/hotels";
+          window.location.href = "/hotels";
         } else {
           dispatch(clearUser());
           clearAuth();
@@ -260,7 +252,7 @@ function RegisterForm() {
         username: user.email.split("@")[0],
         email: user.email,
       };
-      const authRole = isOwnerIntent ? "owner" : "guest";
+      const authRole = "guest" as const;
 
       dispatch(
         setUser({
@@ -280,27 +272,7 @@ function RegisterForm() {
         refreshToken: tokens.refreshToken,
       });
 
-      if (isOwnerIntent) {
-        // SSO handoff via one-time code — tokens never appear in the URL.
-        // The partner portal redeems the code server-to-server via GET /api/sso/handoff?code=<uuid>.
-        const PORTAL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
-        // Phone/email travel inside the server-side handoff payload, NOT the URL,
-        // so no PII lands in browser history / access logs / Referer.
-        const handoff = await fetch("/api/sso/handoff", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            phone,
-            email: data.email,
-          }),
-        });
-        const { code } = await handoff.json();
-        window.location.href = `${PORTAL}/sso?code=${encodeURIComponent(code)}`;
-      } else {
-        window.location.href = "/hotels";
-      }
+      window.location.href = "/hotels";
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : "Registration failed. Please try again.";
       setSubmitError(msg);
@@ -310,28 +282,16 @@ function RegisterForm() {
     }
   }
 
-  // ── Left sidebar copy ───────────────────────────────────────────────────
-  const sidebarContent = isOwnerIntent
-    ? {
-        icon: <Building2 className="w-8 h-8 text-orange-500" />,
-        heading: "List your property.\nStart earning today.",
-        bullets: [
-          "Reach thousands of hourly travellers",
-          "Full control over pricing and availability",
-          "Dedicated owner dashboard & analytics",
-          "24/7 support for property partners",
-        ],
-      }
-    : {
-        icon: <UserCircle2 className="w-8 h-8 text-orange-500" />,
-        heading: "Book hotels\nby the hour.",
-        bullets: [
-          "Pay only for the hours you need",
-          "Instant booking confirmation",
-          "Best-in-class properties across India",
-          "Flexible check-in & check-out",
-        ],
-      };
+  const sidebarContent = {
+    icon: <UserCircle2 className="w-8 h-8 text-orange-500" />,
+    heading: "Book hotels\nby the hour.",
+    bullets: [
+      "Pay only for the hours you need",
+      "Instant booking confirmation",
+      "Best-in-class properties across India",
+      "Flexible check-in & check-out",
+    ],
+  };
 
   // ── Progress indicator ──────────────────────────────────────────────────
   const steps: Step[] = ["PHONE", "OTP", "CREDENTIALS"];
@@ -630,11 +590,7 @@ function RegisterForm() {
                 onClick={() => setSubmitError("")}
                 className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold text-sm transition disabled:opacity-60"
               >
-                {isSubmitting
-                  ? "Creating account…"
-                  : isOwnerIntent
-                  ? "Create account & start listing"
-                  : "Create account"}
+                {isSubmitting ? "Creating account…" : "Create account"}
               </button>
             </form>
           )}
