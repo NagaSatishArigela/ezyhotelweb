@@ -1,4 +1,4 @@
-// Owner onboarding helpers that are not yet backed by ezyhotelsserver.
+// Owner onboarding helpers that are not yet backed by quicknestserver.
 // Wizard step CRUD (createDraft/saveStep/submit/getStatus/revise) is wired
 // to the real Properties API via `propertiesApi` in `@/lib/api`.
 // These remaining functions simulate network latency and stand in for

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -32,16 +32,7 @@ const cities = ["Bangalore", "Chennai", "Delhi", "Gurgaon", "Hyderabad", "Mumbai
 
 function useListPropertyHref() {
   const role = useAppSelector(selectRole);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || role !== "owner") {
-    return { href: "/register?intent=owner", label: "List your property", sub: "Start earning in 30 mins" };
-  }
-
+  if (role !== "owner") return { href: "/register?intent=owner", label: "List your property", sub: "Start earning in 30 mins" };
   // Owners manage listings in the partner portal — link there instead of the
   // removed /owner/* routes (which proxy.ts bounces to /register → loop).
   return { href: `${PORTAL_URL}/login`, label: "My Property", sub: "Go to partner portal" };
@@ -50,18 +41,12 @@ function useListPropertyHref() {
 function TopBar() {
   const { user, logout } = useAuthState();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { href: listPropertyHref, label: listLabel, sub: listSub } = useListPropertyHref();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const safeUser = mounted ? user : null;
-  const displayName = safeUser?.name?.trim() || safeUser?.email?.trim() || "Guest";
+  const displayName = user?.name?.trim() || user?.email?.trim() || "Guest";
   const displayInitial = displayName.charAt(0).toUpperCase();
 
   const openDropdown = () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); setShowDropdown(true); };
@@ -89,7 +74,7 @@ function TopBar() {
               <span className="font-bold text-orange-600">+91 94926 91010</span>
             </a>
 
-            {safeUser ? (
+            {user ? (
               <div className="relative" onMouseEnter={openDropdown} onMouseLeave={scheduleClose}>
                 <button className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-orange-100 transition-colors">
                   <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-lg shadow-md">{displayInitial}</div>
@@ -112,7 +97,7 @@ function TopBar() {
           </div>
 
           <div className="flex items-center gap-4 md:hidden">
-            {safeUser ? (
+            {user ? (
               <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-lg shadow-md">{displayInitial}</div>
             ) : (
               <Link href="/login" className="px-5 py-2 bg-orange-500 text-white font-bold rounded-full hover:bg-orange-600 shadow-lg text-sm">Login</Link>

@@ -1,5 +1,4 @@
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 // ── Request helper ──────────────────────────────────────────────────────────
 
@@ -46,7 +45,7 @@ export class ApiError extends Error {
   }
 }
 
-// ── Response types (matching ezyhotelsserver contract) ─────────────────────
+// ── Response types (matching quicknestserver contract) ─────────────────────
 
 export interface AuthTokens {
   accessToken: string;
@@ -73,7 +72,6 @@ export interface SendOtpResponse {
   message: string;
   expiresIn: number;
   resendAfter: number;
-  otp?: string;
 }
 
 // POST /auth/verify-otp — two possible shapes
