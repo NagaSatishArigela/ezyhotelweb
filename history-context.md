@@ -1,4 +1,4 @@
-# ezyhotelsweb — history & context
+# quicknestweb — history & context
 
 > Handoff doc for developers picking up this repo. Complements `CLAUDE.md`
 > (coding rules / architecture) and `AGENTS.md`. Last updated: 2026-08.
@@ -17,9 +17,9 @@ Tailwind v4. Runs on **port 3001**. SSG/ISR for SEO (targets 100/100 Lighthouse)
 
 | Repo | Role | Port |
 |------|------|------|
-| ezyhotelsserver | Backend API + DB | 4000 |
-| **ezyhotelsweb** (this) | Public storefront (guests) | 3001 |
-| ezyhotelsportal | Owner / Admin / Support portal | 3000 |
+| quicknestserver | Backend API + DB | 4000 |
+| **quicknestweb** (this) | Public storefront (guests) | 3001 |
+| quicknestportal | Owner / Admin / Support portal | 3000 |
 
 This app calls the backend at `:4000` (see `lib/api.ts`). Guest auth uses a
 custom JWT (`jose`) + `proxy.ts` (Next 16 middleware, **not** `middleware.ts`)
@@ -58,7 +58,7 @@ with the `pph_session` httpOnly cookie.
 ## How to run
 
 **Prerequisites:** Node 20. For live data, the backend must be running (see
-`ezyhotelsserver/history-context.md` → docker compose + `start:dev`).
+`quicknestserver/history-context.md` → docker compose + `start:dev`).
 
 ```bash
 npm install
@@ -90,5 +90,5 @@ npm run lint
 
 ## Related
 
-- Backend + DB setup: `ezyhotelsserver/history-context.md`
-- Portal: `ezyhotelsportal/history-context.md`
+- Backend + DB setup: `quicknestserver/history-context.md`
+- Portal: `quicknestportal/history-context.md`

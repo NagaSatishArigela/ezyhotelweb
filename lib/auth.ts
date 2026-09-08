@@ -8,13 +8,8 @@ function requireEnv(name: string): string {
   return val;
 }
 
-const DEV_FALLBACK_SECRET = "dev-local-secret-key";
-
 // Evaluated once at module load — avoids per-call TextEncoder allocation
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ??
-    (process.env.NODE_ENV === "production" ? requireEnv("JWT_SECRET") : DEV_FALLBACK_SECRET)
-);
+const JWT_SECRET = new TextEncoder().encode(requireEnv("JWT_SECRET"));
 
 export interface JWTPayload {
   userId: number;

@@ -1,1 +1,1 @@
-# ezyhotelsweb
+# quicknestweb

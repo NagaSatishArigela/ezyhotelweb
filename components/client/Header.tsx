@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -8,7 +8,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { User, Phone, Building2, Menu, CalendarDays } from "lucide-react";
 import { EzyLogo } from "@/components/brand/EzyLogo";
 import { useAuthState } from "@/modules/auth/hooks/useAuthState";
+import { useAppSelector } from "@/store/hooks";
+import { selectRole } from "@/store/selectors/authSelectors";
 
+// Owner operations live in the partner portal (a separate origin), not in this
+// guest storefront — /owner/* routes were removed.
 const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
 
 // framer-motion only loads when menu opens — keeps it out of the initial bundle
@@ -27,24 +31,22 @@ const cityLandmarks: Record<string, string> = {
 const cities = ["Bangalore", "Chennai", "Delhi", "Gurgaon", "Hyderabad", "Mumbai", "Pune"];
 
 function useListPropertyHref() {
-  return { href: `${PORTAL_URL}/login`, label: "List your property", sub: "Start earning in 30 mins" };
+  const role = useAppSelector(selectRole);
+  if (role !== "owner") return { href: "/register?intent=owner", label: "List your property", sub: "Start earning in 30 mins" };
+  // Owners manage listings in the partner portal — link there instead of the
+  // removed /owner/* routes (which proxy.ts bounces to /register → loop).
+  return { href: `${PORTAL_URL}/login`, label: "My Property", sub: "Go to partner portal" };
 }
 
 function TopBar() {
   const { user, logout } = useAuthState();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { href: listPropertyHref, label: listLabel, sub: listSub } = useListPropertyHref();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const safeUser = mounted ? user : null;
-  const displayName = safeUser?.name?.trim() || safeUser?.email?.trim() || "Guest";
+  const displayName = user?.name?.trim() || user?.email?.trim() || "Guest";
   const displayInitial = displayName.charAt(0).toUpperCase();
 
   const openDropdown = () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); setShowDropdown(true); };
@@ -72,7 +74,7 @@ function TopBar() {
               <span className="font-bold text-orange-600">+91 94926 91010</span>
             </a>
 
-            {safeUser ? (
+            {user ? (
               <div className="relative" onMouseEnter={openDropdown} onMouseLeave={scheduleClose}>
                 <button className="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-orange-100 transition-colors">
                   <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-lg shadow-md">{displayInitial}</div>
@@ -95,7 +97,7 @@ function TopBar() {
           </div>
 
           <div className="flex items-center gap-4 md:hidden">
-            {safeUser ? (
+            {user ? (
               <div className="w-10 h-10 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-lg shadow-md">{displayInitial}</div>
             ) : (
               <Link href="/login" className="px-5 py-2 bg-orange-500 text-white font-bold rounded-full hover:bg-orange-600 shadow-lg text-sm">Login</Link>
