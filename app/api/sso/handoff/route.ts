@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { verifyAccessToken } from "@/lib/session";
 
 // The partner portal is a different origin, so the redeem (GET) endpoint must be
 // CORS-callable from it. PILOT HARDENING: move this store to the backend (Redis)
@@ -34,18 +35,25 @@ setInterval(() => {
   for (const [code, entry] of HANDOFF_CODES) {
     if (entry.expiresAt < now) HANDOFF_CODES.delete(code);
   }
-}, 30_000);
+}, 30_000).unref();
 
 // POST: called by the web app after registration to exchange tokens for a code.
 // The code is passed in the redirect URL to the partner portal (?code=<uuid>).
 // Tokens never appear in a URL — they stay server-side until the portal redeems them.
 export async function POST(req: NextRequest) {
-  const { accessToken, refreshToken, phone, email } = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+  const { accessToken, refreshToken, phone, email } = body;
 
   if (!accessToken || typeof accessToken !== "string" || !refreshToken || typeof refreshToken !== "string") {
     return NextResponse.json({ error: "accessToken and refreshToken required" }, { status: 400 });
   }
 
+  if (!(await verifyAccessToken(accessToken))) {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
   const code = randomUUID();
   HANDOFF_CODES.set(code, {
     accessToken,

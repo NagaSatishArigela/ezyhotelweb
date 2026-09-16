@@ -45,7 +45,8 @@ export default function HotelsPageClient({ viewModels, totalCount, activeFilters
 
   const setSort = (sort: FilterParams["sort"]) => {
     const params = new URLSearchParams(searchParams.toString());
-    sort && sort !== "relevance" ? params.set("sort", sort) : params.delete("sort");
+    if (sort && sort !== "relevance") params.set("sort", sort);
+    else params.delete("sort");
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -65,7 +66,8 @@ export default function HotelsPageClient({ viewModels, totalCount, activeFilters
     if (key.startsWith("amenity-")) {
       const name = key.replace("amenity-", "");
       const current = (params.get("amenities") ?? "").split(",").filter((a) => a && a !== name);
-      current.length ? params.set("amenities", current.join(",")) : params.delete("amenities");
+      if (current.length) params.set("amenities", current.join(","));
+      else params.delete("amenities");
     } else if (key === "price") {
       params.delete("minPrice"); params.delete("maxPrice");
     } else {

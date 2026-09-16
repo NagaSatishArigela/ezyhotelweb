@@ -13,9 +13,11 @@ import {
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import { selectUser, selectRole, selectIsAuthenticated } from "@/store/selectors/authSelectors";
+import { useHydrated } from "@/modules/auth/hooks/useHydrated";
 import { useAuthState } from "@/modules/auth/hooks/useAuthState";
 
 export default function ProfilePage() {
+  const hydrated = useHydrated();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
   const role = useAppSelector(selectRole);
@@ -25,7 +27,7 @@ export default function ProfilePage() {
     if (!isAuthenticated) window.location.href = "/login";
   }, [isAuthenticated]);
 
-  if (!user) return null;
+  if (!hydrated || !user) return null;
 
   const displayName = user.name?.trim() || user.email?.split("@")[0] || "User";
   const initial = displayName.charAt(0).toUpperCase();
@@ -84,30 +86,16 @@ export default function ProfilePage() {
             <span className="text-gray-400 text-xs">→</span>
           </Link>
 
-          {/* Owner operations live in the partner portal — link there */}
-          {isOwner ? (
-            <a
-              href={`${process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000"}/login`}
-              className="flex items-center justify-between px-6 py-4 hover:bg-orange-50 transition-colors"
-            >
-              <div className="flex items-center gap-3 text-sm font-medium text-gray-700">
-                <Building2 className="w-4 h-4 text-orange-500" />
-                Manage my property
-              </div>
-              <span className="text-gray-400 text-xs">↗ Partner portal</span>
-            </a>
-          ) : (
-            <Link
-              href="/register?intent=owner"
-              className="flex items-center justify-between px-6 py-4 hover:bg-orange-50 transition-colors"
-            >
-              <div className="flex items-center gap-3 text-sm font-medium text-gray-700">
-                <Building2 className="w-4 h-4 text-orange-500" />
-                List your property
-              </div>
-              <span className="text-gray-400 text-xs">→</span>
-            </Link>
-          )}
+          <a
+            href={`${process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000"}/login`}
+            className="flex items-center justify-between px-6 py-4 hover:bg-orange-50 transition-colors"
+          >
+            <div className="flex items-center gap-3 text-sm font-medium text-gray-700">
+              <Building2 className="w-4 h-4 text-orange-500" />
+              List your property
+            </div>
+            <span className="text-gray-400 text-xs">↗ Partner portal</span>
+          </a>
 
           <button
             onClick={logout}

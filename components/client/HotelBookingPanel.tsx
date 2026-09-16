@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChevronUp, Check, ArrowRight, Phone, Clock, Users, BedDouble, ChevronDown } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 
@@ -23,7 +23,7 @@ function todayStr() {
 }
 
 function addHours(dateStr: string, timeStr: string, hours: number): string {
-  const [h, mPart] = timeStr.split(":");
+  const [h] = timeStr.split(":");
   const isPM = timeStr.includes("PM");
   let hour = parseInt(h);
   if (isPM && hour !== 12) hour += 12;
@@ -43,9 +43,7 @@ export default function HotelBookingPanel({ basePrice, hotelId, plans }: HotelBo
   const [checkInTime, setCheckInTime] = useState("12:00 PM");
   const [rooms, setRooms] = useState(1);
   const [guests, setGuests] = useState(2);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
 
   const matchedPlan = plans.find((p) => p.hours === selectedHours);
   const pricePerHour = Math.round(basePrice / 3);
@@ -54,7 +52,7 @@ export default function HotelBookingPanel({ basePrice, hotelId, plans }: HotelBo
   const totalWithTax = Math.round(totalPrice * 1.18);
 
   // suppressHydrationWarning on the checkout display — value depends on client clock
-  const checkOutStr = mounted ? addHours(checkInDate, checkInTime, selectedHours) : addHours(todayStr(), "12:00 PM", selectedHours);
+  const checkOutStr = addHours(checkInDate, checkInTime, selectedHours);
 
   const handleReserve = () => {
     const params = new URLSearchParams({
@@ -68,7 +66,7 @@ export default function HotelBookingPanel({ basePrice, hotelId, plans }: HotelBo
     window.location.href = `/booking/${hotelId}?${params.toString()}`;
   };
 
-  const GuestRoomSelector = () => (
+  const guestRoomSelector = (
     <div className="grid grid-cols-2 gap-3">
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-3">
         <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-1">
@@ -96,7 +94,7 @@ export default function HotelBookingPanel({ basePrice, hotelId, plans }: HotelBo
   return (
     <>
       {/* Desktop sidebar */}
-      <div className="hidden lg:block sticky top-6">
+      <div className="block lg:sticky lg:top-6 pb-24 lg:pb-0">
         <div className="flex flex-col gap-4">
           <div className="bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
             <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 p-3 px-6 text-white text-center">
@@ -134,7 +132,7 @@ export default function HotelBookingPanel({ basePrice, hotelId, plans }: HotelBo
               </div>
 
               {/* Rooms + Guests */}
-              <GuestRoomSelector />
+              {guestRoomSelector}
 
               {/* Quick-select plan cards */}
               <div className="grid grid-cols-2 gap-2">
@@ -191,7 +189,7 @@ export default function HotelBookingPanel({ basePrice, hotelId, plans }: HotelBo
                       <div>
                         <p className="text-[8px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Check-in</p>
                         <p className="text-[10px] font-black text-gray-900 leading-tight">
-                          {mounted ? new Date(checkInDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "2-digit" }) : "—"}, {checkInTime}
+                          {new Date(checkInDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "2-digit" })}, {checkInTime}
                         </p>
                       </div>
                       <div className="text-[8px] font-black text-gray-400 px-2 py-1 bg-white rounded-full border border-gray-100 uppercase tracking-widest shrink-0">

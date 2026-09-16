@@ -14,7 +14,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { accessToken, refreshToken } = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+  const { accessToken, refreshToken } = body;
 
   if (!accessToken || typeof accessToken !== "string") {
     return NextResponse.json({ error: "accessToken required" }, { status: 400 });

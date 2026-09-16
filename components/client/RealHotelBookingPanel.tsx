@@ -52,7 +52,7 @@ export default function RealHotelBookingPanel({
   const [checkInTime, setCheckInTime] = useState("12:00 PM");
   const [guests, setGuests] = useState(2);
 
-  if (bookableRoomTypes.length === 0) {
+  if (bookableRoomTypes.length === 0 || (!allowHourly && !allowFullday)) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 text-center text-sm text-gray-500">
         No room types are available for booking right now.
@@ -83,7 +83,11 @@ export default function RealHotelBookingPanel({
     });
   })();
 
+  const selectedRate = bookingType === "hourly" ? hourlyRupees : fulldayRupees;
+  const canReserve = selectedRate != null && selectedRate > 0 && guests <= (selectedRoomType.maxOccupancy ?? 10) && selectedRoomType.count > 0 && !!checkInDate;
+
   const handleReserve = () => {
+    if (!canReserve) return;
     const params = new URLSearchParams({
       roomTypeId: selectedRoomType.id,
       bookingType,
@@ -98,7 +102,7 @@ export default function RealHotelBookingPanel({
   return (
     <>
       {/* Desktop sidebar */}
-      <div className="hidden lg:block sticky top-6">
+      <div className="block lg:sticky lg:top-6 pb-24 lg:pb-0">
         <div className="flex flex-col gap-4">
           <div className="bg-white rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
             <div className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-400 p-3 px-6 text-white text-center">
@@ -248,6 +252,7 @@ export default function RealHotelBookingPanel({
                 )}
               </div>
 
+              {!canReserve && <p role="status" className="text-sm text-orange-700">Choose an available rate, date, and guest count for this room.</p>}
               <div className="pt-2 flex items-center justify-between px-1">
                 <div className="flex flex-col">
                   <span className="text-3xl font-black text-gray-900 tracking-tighter">₹{totalWithTax}</span>
@@ -255,6 +260,7 @@ export default function RealHotelBookingPanel({
                 </div>
                 <button
                   onClick={handleReserve}
+                  disabled={!canReserve}
                   className="bg-orange-600 hover:bg-orange-700 text-white h-14 px-10 rounded-2xl font-black uppercase tracking-[0.15em] text-[10px] shadow-xl shadow-orange-100 active:scale-95 transition-all"
                 >
                   Reserve
@@ -279,6 +285,7 @@ export default function RealHotelBookingPanel({
           </div>
           <button
             onClick={handleReserve}
+                  disabled={!canReserve}
             className="bg-orange-600 text-white px-8 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-orange-100 active:scale-95 transition-all"
           >
             Reserve

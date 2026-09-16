@@ -39,6 +39,7 @@ async function fetchRealProperties(params: FilterParams) {
       minPrice: params.minPrice ? Number(params.minPrice) * 100 : undefined,
       maxPrice: params.maxPrice ? Number(params.maxPrice) * 100 : undefined,
       amenities: params.amenities,
+      sort: params.sort === "price_asc" || params.sort === "price_desc" ? params.sort : undefined,
     });
     return result.items;
   } catch {

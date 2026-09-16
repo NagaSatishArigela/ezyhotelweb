@@ -2,27 +2,20 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAppDispatch } from "@/store/hooks";
 import { useSelector } from "react-redux";
 import { setUser, setLoading, clearUser } from "@/store/authSlice";
-import { selectIsAuthenticated, selectRole } from "@/store/selectors/authSelectors";
+import { selectIsAuthenticated } from "@/store/selectors/authSelectors";
 import { useToast } from "@/components/client/Toast";
 import { authApi, ApiError } from "@/lib/api";
+import { safeInternalRedirect } from "@/lib/navigation";
 import { clearAuth, saveAuthImmediate } from "@/lib/persist";
 
 const DEV_LOGIN_EMAIL = "dev@example.com";
 const DEV_LOGIN_PASSWORD = "Dev@12345";
 
-const GoogleIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24">
-    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
-    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-  </svg>
-);
 
 function isDevMode() {
   return process.env.NODE_ENV !== "production";
@@ -31,34 +24,24 @@ function isDevMode() {
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(isDevMode() ? DEV_LOGIN_EMAIL : "");
+  const [password, setPassword] = useState(isDevMode() ? DEV_LOGIN_PASSWORD : "");
   const [fieldError, setFieldError] = useState("");
 
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { success, error } = useToast();
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const role = useSelector(selectRole);
 
   // Honor ?redirect=<path> (e.g. set by the booking flow), but only allow
   // same-site absolute paths — never an external URL (open-redirect guard).
   const rawRedirect = searchParams.get("redirect");
-  const safeRedirect = rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : null;
-  const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
+  const safeRedirect = safeInternalRedirect(rawRedirect);
 
   // Already logged in — redirect away from login page.
   // Persisted auth state (localStorage) can be stale relative to the httpOnly
   // pph_session cookie the proxy actually checks, so verify it first — otherwise
   // a missing/expired cookie causes an infinite redirect loop with proxy.ts.
-  useEffect(() => {
-    if (isDevMode() && !email && !password) {
-      setEmail(DEV_LOGIN_EMAIL);
-      setPassword(DEV_LOGIN_PASSWORD);
-    }
-  }, [email, password]);
-
   useEffect(() => {
     if (!isAuthenticated) return;
     let cancelled = false;
@@ -67,7 +50,7 @@ function LoginForm() {
       .then((data: { valid: boolean }) => {
         if (cancelled) return;
         if (data.valid) {
-          const target = safeRedirect ?? `${PORTAL_URL}/login`;
+          const target = safeRedirect ?? "/hotels";
           const currentUrl = window.location.href;
           if (!currentUrl.startsWith(target) && currentUrl !== target) {
             window.location.href = target;
@@ -84,7 +67,7 @@ function LoginForm() {
         if (!cancelled) { dispatch(clearUser()); clearAuth(); }
       });
     return () => { cancelled = true; };
-  }, [isAuthenticated, role, dispatch, safeRedirect, PORTAL_URL]);
+  }, [isAuthenticated, dispatch, safeRedirect]);
 
   // Shown when redirected from /register after existing phone detected
   const existingAccount = searchParams.get("existing") === "1";
@@ -146,7 +129,7 @@ function LoginForm() {
       });
 
       success("Welcome back!");
-      const target = safeRedirect ?? `${PORTAL_URL}/login`;
+      const target = safeRedirect ?? "/hotels";
       if (window.location.href !== target) {
         window.location.href = target;
       }
@@ -257,15 +240,6 @@ function LoginForm() {
                 {isSubmitting ? "Signing in…" : "Sign In"}
               </button>
 
-              <div className="relative flex items-center py-3">
-                <div className="grow border-t border-gray-100" />
-                <span className="shrink mx-4 text-gray-400 text-[10px] font-bold uppercase tracking-widest">Or Continue With</span>
-                <div className="grow border-t border-gray-100" />
-              </div>
-
-              <button type="button" className="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-bold text-gray-700 active:scale-[0.98]">
-                <GoogleIcon /> Google
-              </button>
             </form>
 
             <p className="text-center text-xs text-gray-500 mt-8">

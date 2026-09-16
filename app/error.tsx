@@ -15,7 +15,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
         <p className="text-gray-500 mb-8 text-sm leading-relaxed">
-          An unexpected error occurred. Our team has been notified. Please try again or go back home.
+          An unexpected error occurred. Please try again or go back home.
         </p>
         <div className="flex gap-3 justify-center">
           <button

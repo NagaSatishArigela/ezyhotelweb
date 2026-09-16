@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useSearchParams, notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,6 +10,7 @@ import {
   MapPin, BedDouble, Users, Phone, Home, CalendarCheck, Navigation,
 } from "lucide-react";
 import { hotelsData } from "@/data/hotelsData";
+import { to24Hour } from "@/lib/time";
 import RealBookingConfirm from "./RealBookingConfirm";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -39,17 +40,20 @@ function BookingConfirmInner() {
   const sp = useSearchParams();
   const [show, setShow] = useState(false);
 
-  useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setShow(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (UUID_RE.test(id)) {
-    return <RealBookingConfirm bookingId={id} />;
+    return <RealBookingConfirm key={id} bookingId={id} />;
   }
 
   // Demo (numeric-id) confirmation is dev-only; never render it in production.
   if (process.env.NODE_ENV === "production") notFound();
 
   const hotel = hotelsData.find((h) => h.id === Number(id));
-  const stableRef = useMemo(() => `EZY${Math.random().toString(36).slice(2, 10).toUpperCase()}`, []);
+  const stableRef = `DEMO-${id}`;
   const bookingRef = sp.get("ref") ?? stableRef;
   const total = sp.get("total") ?? "0";
   const date = sp.get("date") ?? "";
@@ -59,7 +63,7 @@ function BookingConfirmInner() {
   const guests = Number(sp.get("guests") ?? 2);
   const guestName = sp.get("name") ?? "Guest";
 
-  const checkIn = date ? new Date(`${date}T12:00:00`) : new Date();
+  const checkIn = date ? new Date(`${date}T${to24Hour(time)}:00`) : new Date();
   const checkOut = new Date(checkIn.getTime() + hours * 3600000);
   const fmt = (d: Date) =>
     d.toLocaleString("en-IN", { day: "numeric", month: "short", year: "2-digit", hour: "numeric", minute: "2-digit", hour12: true });

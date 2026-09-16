@@ -1,11 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer, { setUser } from "./authSlice";
-import onboardingReducer, { rehydrateOnboarding } from "./onboardingSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    onboarding: onboardingReducer,
   },
 });
 
@@ -16,6 +14,7 @@ if (typeof window !== "undefined") {
   // (e.g. /my-bookings, /profile) don't see a transient unauthenticated
   // state and bounce to /login on a full page load.
   try {
+    localStorage.removeItem("pph_onboarding");
     const rawAuth = localStorage.getItem("pph_auth");
     if (rawAuth) {
       const { user, role } = JSON.parse(rawAuth);
@@ -26,10 +25,6 @@ if (typeof window !== "undefined") {
         store.dispatch(setUser({ user, role, accessToken: "", refreshToken: "" }));
       }
     }
-    const rawOnboarding = localStorage.getItem("pph_onboarding");
-    if (rawOnboarding) {
-      store.dispatch(rehydrateOnboarding(JSON.parse(rawOnboarding)));
-    }
   } catch { /* corrupted storage — ignore */ }
 
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -37,21 +32,11 @@ if (typeof window !== "undefined") {
     if (saveTimer) return;
     saveTimer = setTimeout(() => {
       saveTimer = null;
-      const { auth, onboarding } = store.getState();
+      const { auth } = store.getState();
       try {
         localStorage.setItem("pph_auth", JSON.stringify({
           user: auth.user,
           role: auth.role,
-        }));
-        localStorage.setItem("pph_onboarding", JSON.stringify({
-          draftId: onboarding.draftId,
-          currentStep: onboarding.currentStep,
-          completedSteps: onboarding.completedSteps,
-          propertyType: onboarding.propertyType,
-          bookingPolicy: onboarding.bookingPolicy,
-          selectedAmenities: onboarding.selectedAmenities,
-          status: onboarding.status,
-          submissionRef: onboarding.submissionRef,
         }));
       } catch { /* storage quota */ }
     }, 300);
