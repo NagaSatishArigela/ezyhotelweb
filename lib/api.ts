@@ -110,14 +110,6 @@ export interface MeResponse {
   globalRole: "USER" | "ADMIN" | "SUPER_ADMIN";
 }
 
-// GET /me/onboarding
-export interface OnboardingResponse {
-  status: "READY" | "NOT_APPLICABLE";
-  canOnboardProperty: boolean;
-  isAdmin: boolean;
-  nextStep: "CREATE_PROPERTY" | "ADMIN_DASHBOARD";
-}
-
 // ── Auth API ───────────────────────────────────────────────────────────────
 
 export const authApi = {
@@ -157,10 +149,6 @@ export const authApi = {
     return request("/auth/me", { method: "GET" }, accessToken);
   },
 
-  onboarding(accessToken: string): Promise<OnboardingResponse> {
-    return request("/me/onboarding", { method: "GET" }, accessToken);
-  },
-
   // Response is flat AuthTokens (not wrapped in { tokens: ... })
   refreshToken(refreshToken: string): Promise<AuthTokens> {
     return request("/auth/refresh-token", {
@@ -177,37 +165,6 @@ export const authApi = {
     );
   },
 };
-
-// ── Owner Notifications API ─────────────────────────────────────────────────
-
-export type NotificationType =
-  | "status_change"
-  | "revision_request"
-  | "approval"
-  | "rejection"
-  | "document_verified"
-  | "general";
-
-export interface OwnerNotification {
-  id: string;
-  ownerId: string;
-  propertyId: string | null;
-  type: NotificationType;
-  title: string;
-  body: string;
-  actionUrl: string | null;
-  isRead: boolean;
-  createdAt: string;
-}
-
-// GET /owners/me/notifications
-export interface NotificationListResult {
-  items: OwnerNotification[];
-  total: number;
-  page: number;
-  limit: number;
-  unreadCount: number;
-}
 
 // ── Public Properties (guest discovery) API ────────────────────────────────
 
@@ -472,32 +429,6 @@ export const bookingsApi = {
     if (params.limit) query.set("limit", String(params.limit));
     const qs = query.toString();
     return request(`/me/bookings${qs ? `?${qs}` : ""}`, { method: "GET" }, accessToken);
-  },
-};
-
-export const notificationsApi = {
-  list(
-    accessToken: string,
-    params: { unread?: boolean; page?: number; limit?: number } = {}
-  ): Promise<NotificationListResult> {
-    const query = new URLSearchParams();
-    if (params.unread) query.set("unread", "true");
-    if (params.page) query.set("page", String(params.page));
-    if (params.limit) query.set("limit", String(params.limit));
-    const qs = query.toString();
-    return request(
-      `/owners/me/notifications${qs ? `?${qs}` : ""}`,
-      { method: "GET" },
-      accessToken
-    );
-  },
-
-  markRead(accessToken: string, notificationId: string): Promise<OwnerNotification> {
-    return request(
-      `/owners/me/notifications/${notificationId}/read`,
-      { method: "PATCH" },
-      accessToken
-    );
   },
 };
 
