@@ -1,45 +1,22 @@
 import { jwtVerify } from "jose";
 
-function requireEnv(name: string): string {
-  const val = process.env[name];
-  if (!val) throw new Error(`Missing required environment variable: ${name}`);
-  return val;
-}
-
-const DEV_FALLBACK_SECRET = "dev-local-secret-key";
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? (process.env.NODE_ENV === "production" ? requireEnv("JWT_SECRET") : DEV_FALLBACK_SECRET)
-);
-
-function decodeJwtPayload(token: string): { exp?: number } | null {
-  try {
-    const [, payloadPart] = token.split(".");
-    if (!payloadPart) return null;
-    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-    const json = Buffer.from(padded, "base64").toString("utf8");
-    const payload = JSON.parse(json) as { exp?: number };
-    return payload;
-  } catch {
-    return null;
-  }
-}
-
 export async function verifyAccessToken(token: string): Promise<boolean> {
+  if (token === "dev-access-token") return process.env.NODE_ENV === "development";
   try {
-    if (token === "dev-access-token" && process.env.NODE_ENV !== "production") {
+    const secret = process.env.JWT_SECRET;
+    if (secret) {
+      await jwtVerify(token, new TextEncoder().encode(secret), {
+        algorithms: ["HS256"], requiredClaims: ["exp"],
+      });
       return true;
     }
-
-    try {
-      await jwtVerify(token, JWT_SECRET);
-      return true;
-    } catch {
-      const payload = decodeJwtPayload(token);
-      if (!payload || typeof payload.exp !== "number") return false;
-      return Date.now() < payload.exp * 1000;
-    }
-  } catch {
-    return false;
-  }
+    // Without the signing key, delegate verification to the backend.
+    // Never trust an expiry decoded from an unverified JWT.
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
+    const response = await fetch(apiUrl + "/auth/me", {
+      headers: { Authorization: "Bearer " + token },
+      cache: "no-store", signal: AbortSignal.timeout(10_000),
+    });
+    return response.ok;
+  } catch { return false; }
 }

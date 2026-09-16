@@ -9,6 +9,7 @@ import {
   SearchX, Home, Hotel, CheckCircle, XCircle, AlertCircle, RefreshCw,
 } from "lucide-react";
 // Note: XCircle, CheckCircle are used in REAL_STATUS_CONFIG below
+import { useHydrated } from "@/modules/auth/hooks/useHydrated";
 import { useAppSelector } from "@/store/hooks";
 import { selectAccessToken, selectIsAuthenticated } from "@/store/selectors/authSelectors";
 import {
@@ -48,6 +49,7 @@ const ROOM_TYPE_LABELS: Record<string, string> = {
 type FilterTab = "all" | "upcoming" | "completed" | "cancelled";
 
 export default function MyBookingsPage() {
+  const hydrated = useHydrated();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const accessToken = useAppSelector(selectAccessToken);
   const router = useRouter();
@@ -69,11 +71,11 @@ export default function MyBookingsPage() {
   useEffect(() => {
     if (!accessToken) return;
     let aborted = false;
-    setLoadingReal(true);
     bookingsApi
       .myBookings(accessToken)
       .then(async (res) => {
         if (aborted) return;
+        setRealError(null);
         setRealBookings(res.items);
         const ids = Array.from(new Set(res.items.map((b) => b.propertyId)));
         const settled = await Promise.allSettled(ids.map((id) => publicPropertiesApi.getById(id)));
@@ -102,7 +104,7 @@ export default function MyBookingsPage() {
     }
   };
 
-  if (!isAuthenticated) return null;
+  if (!hydrated || !isAuthenticated) return null;
 
   const displayBookings: ApiBooking[] = realBookings;
 

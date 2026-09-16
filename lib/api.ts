@@ -8,12 +8,7 @@ async function request<T>(
   options: RequestInit = {},
   accessToken?: string
 ): Promise<T> {
-  const callerHeaders: Record<string, string> =
-    options.headers && typeof options.headers === "object" && !Array.isArray(options.headers)
-      ? Object.fromEntries(
-          Object.entries(options.headers).filter(([, v]) => typeof v === "string")
-        )
-      : {};
+  const callerHeaders = Object.fromEntries(new Headers(options.headers).entries());
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...callerHeaders,
@@ -23,7 +18,9 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options, headers, signal: options.signal ?? AbortSignal.timeout(15_000),
+  });
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -33,6 +30,7 @@ async function request<T>(
     throw new ApiError(res.status, message);
   }
 
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 

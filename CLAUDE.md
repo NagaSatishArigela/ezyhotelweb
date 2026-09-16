@@ -78,8 +78,6 @@ Hotel booking by the hour. Migrated from React 19 + Vite SPA for 100/100 Lightho
 | `/hotels` | ISR `revalidate=3600` + URL `searchParams` (server-side filtering) |
 | `/hotels/[id]` | SSG + `generateStaticParams` (50 pre-built pages) |
 | `/login` | `'use client'` |
-| `/owner-auth` | `'use client'` |
-| `/owner/onboarding/*` | `'use client'` |
 
 ---
 
@@ -89,14 +87,14 @@ Hotel booking by the hour. Migrated from React 19 + Vite SPA for 100/100 Lightho
 
 Server Components can import Client Components, not the reverse. Components requiring `useState`, `useSelector`, `useRouter`, or event handlers must be `'use client'`.
 
-- **Client:** `Header`, `FilterSidebar`, `SearchBar`, `FeaturedHotelCard`, `HotelGallery`, `HotelBookingPanel`, `StoreProvider`, all owner onboarding pages
+- **Client:** `Header`, `FilterSidebar`, `SearchBar`, `FeaturedHotelCard`, `HotelGallery`, `HotelBookingPanel`, `StoreProvider`
 - **Server:** `HeroSection`, `FeaturedHotels`, `Categories`, `Testimonials`, `Footer`, `TrendingCities`, `app/hotels/[id]/page.tsx`
 
 ### Auth
 
 - `proxy.ts` (Next.js 16 — **not** `middleware.ts`) with export named `proxy` reads `pph_session` httpOnly cookie
-- `/`, `/hotels`, `/hotels/[id]`, `/login`, `/owner-auth` are **public**
-- Protected: `/owner/*`, `/bookings/*`, `/profile/*`, `/checkout/*`
+- `/`, `/hotels`, `/hotels/[id]`, `/login`, `/register` are **public**
+- Protected: `/bookings/*`, `/profile/*`, `/checkout/*`
 - Use `jose` not `jsonwebtoken` — `jsonwebtoken` uses Node.js crypto and fails on Edge Runtime
 - Two separate JWT routes: `POST /api/auth` (guest, role: "guest") and `POST /api/owner/auth` (owner, role: "owner")
 
@@ -105,11 +103,10 @@ Server Components can import Client Components, not the reverse. Components requ
 ```
 RootState = {
   auth: { user: User | null; role: "guest" | "owner" | null; isLoading: boolean }
-  onboarding: { draftId, currentStep, completedSteps, status, ... }
 }
 ```
 
-- Persisted via `redux-persist` with SSR-safe noop storage on server
+- Auth is persisted in browser storage; session tokens remain in the httpOnly cookie.
 - `StoreProvider` wraps `app/layout.tsx`
 
 ### Filter state → URL (not Redux)
@@ -122,9 +119,9 @@ RootState = {
 
 Raw `Hotel` → `toHotelCardViewModel()` → `HotelCardViewModel`. UI never touches raw hotel data directly. Price labels use `₹` (rupees).
 
-### Owner Onboarding
+### Owner / Partner Portal
 
-Multi-step wizard at `/owner/onboarding/[step]`. Draft/step/submit/status calls go to ezyhotelsserver's Properties API via `propertiesApi` in `lib/api.ts`; remaining unbuilt pipelines (pincode lookup, file upload, GSTIN/IFSC validation) are mocked in `modules/owner/api.ts`. Steps: basics → location → rooms → photos → legal. State in `onboardingSlice`. Shared components: `WizardNav`, `FormSection`, `WizardStepper`.
+Owner onboarding, property creation, verification, inventory, and property operations belong to the separate partner portal. The Web app exposes only the `NEXT_PUBLIC_PORTAL_URL` entry point from the header and profile; it does not render or persist an owner onboarding flow. The `/api/sso/handoff` route remains as shared portal authentication infrastructure.
 
 ### `@` path alias
 
@@ -139,13 +136,8 @@ Multi-step wizard at `/owner/onboarding/[step]`. Draft/step/submit/status calls 
 | `proxy.ts` | Route protection middleware |
 | `lib/auth.ts` | `signJWT` / `verifyJWT` using `jose` |
 | `store/authSlice.ts` | User + role state |
-| `store/onboardingSlice.ts` | Wizard progress state |
 | `modules/hotels/view-model.ts` | `Hotel` → `HotelCardViewModel` |
 | `modules/hotels/controller.ts` | `filterHotels()` + `buildHotelsPageViewModel()` |
-| `lib/api.ts` | `authApi` + `propertiesApi` — real backend calls |
-| `modules/owner/api.ts` | Remaining owner API stubs (pincode, uploads, GSTIN/IFSC) |
-| `modules/owner/schemas/index.ts` | Zod schemas for all wizard steps |
-| `modules/owner/constants.ts` | `PROPERTY_TYPE_VALUES`, `INDIAN_STATES`, labels |
 | `data/hotelsData.ts` | 50 static hotel entries |
 | `types/index.ts` | `Hotel`, `User`, `HotelCardViewModel`, `FilterParams` |
 

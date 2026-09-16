@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * E2E flow-test skeleton for the M0-M6 module factory loop (Gate 4: E2E Flow
- * Test). Specs live in `e2e/` and exercise the full guest/owner flows against
+ * Test). Specs live in `e2e/` and exercise the guest flows against
  * a running Next.js app + ezyhotelsserver API.
  *
  * Local usage:
@@ -21,9 +21,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? 'github' : 'html',
+  reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -37,7 +37,7 @@ export default defineConfig({
     ? undefined
     : {
         command: 'npm run dev',
-        url: 'http://localhost:3000',
+        url: 'http://localhost:3001',
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
       },

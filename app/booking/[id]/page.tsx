@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Clock, BedDouble, Users, CalendarDays, ChevronRight, ShieldCheck, Tag, CreditCard } from "lucide-react";
 import { hotelsData } from "@/data/hotelsData";
+import { to24Hour } from "@/lib/time";
 import RealBookingView from "./RealBookingView";
 
 // Promo codes are validated server-side via /api/promos/[code] — never stored client-side
@@ -17,7 +18,7 @@ export default function BookingPage() {
   if (UUID_RE.test(id)) {
     return (
       <Suspense fallback={<div className="min-h-screen bg-[#F8F9FA] animate-pulse" />}>
-        <RealBookingView propertyId={id} />
+        <RealBookingView key={id} propertyId={id} />
       </Suspense>
     );
   }
@@ -95,7 +96,7 @@ function BookingPageInner() {
       name: guestName,
       phone: guestPhone,
     });
-    router.push(`/payment?${params.toString()}`);
+    router.push(`/booking-confirm/${id}?${params.toString()}`);
   };
 
   if (!hotel) return (
@@ -104,7 +105,7 @@ function BookingPageInner() {
     </div>
   );
 
-  const checkIn = new Date(`${date}T12:00:00`);
+  const checkIn = new Date(`${date}T${to24Hour(time)}:00`);
   const checkOut = new Date(checkIn.getTime() + hours * 3600000);
   const fmt = (d: Date) => d.toLocaleString("en-IN", { day: "numeric", month: "short", year: "2-digit", hour: "numeric", minute: "2-digit", hour12: true });
 

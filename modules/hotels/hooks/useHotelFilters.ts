@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import type { FilterParams } from "@/types";
 
 export function useHotelFilters() {
@@ -9,6 +9,8 @@ export function useHotelFilters() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
   const filters: FilterParams = {
     q: searchParams.get("q") ?? undefined,
@@ -22,12 +24,13 @@ export function useHotelFilters() {
     (key: keyof FilterParams, value: string | undefined, debounceMs = 0) => {
       const apply = () => {
         const params = new URLSearchParams(searchParams.toString());
-        value ? params.set(key, value) : params.delete(key);
+        if (value) params.set(key, value);
+        else params.delete(key);
         router.push(`${pathname}?${params.toString()}`);
       };
 
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       if (debounceMs > 0) {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(apply, debounceMs);
       } else {
         apply();
@@ -37,6 +40,7 @@ export function useHotelFilters() {
   );
 
   const clearFilters = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     router.push(pathname);
   }, [router, pathname]);
 

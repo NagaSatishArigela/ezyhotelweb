@@ -3,14 +3,14 @@ import type { Metadata } from "next";
 import { buildHotelsPageViewModel } from "@/modules/hotels/controller";
 import HotelsPageClient from "@/components/client/HotelsPageClient";
 import HotelsLoading from "./loading";
-import type { FilterParams } from "@/types";
+import { normalizeFilters } from "@/modules/hotels/filters";
 
 interface HotelsPageProps {
-  searchParams: Promise<FilterParams>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata({ searchParams }: HotelsPageProps): Promise<Metadata> {
-  const { city, q } = await searchParams;
+  const { city, q } = normalizeFilters(await searchParams);
   const title = city ? `Hotels in ${city}` : q ? `Search: ${q}` : "Find Hotels by the Hour";
   return {
     title,
@@ -21,7 +21,7 @@ export async function generateMetadata({ searchParams }: HotelsPageProps): Promi
 }
 
 export default async function HotelsPage({ searchParams }: HotelsPageProps) {
-  const params = await searchParams;
+  const params = normalizeFilters(await searchParams);
   const { viewModels, totalCount, activeFilters } = await buildHotelsPageViewModel(params);
   return (
     <Suspense fallback={<HotelsLoading />}>
