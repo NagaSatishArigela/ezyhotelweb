@@ -8,7 +8,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { User, Phone, Building2, Menu, CalendarDays } from "lucide-react";
 import { EzyLogo } from "@/components/brand/EzyLogo";
 import { useAuthState } from "@/modules/auth/hooks/useAuthState";
+import { useAppSelector } from "@/store/hooks";
+import { selectRole } from "@/store/selectors/authSelectors";
 
+// Owner operations live in the partner portal (a separate origin), not in this
+// guest storefront — /owner/* routes were removed.
 const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
 
 // framer-motion only loads when menu opens — keeps it out of the initial bundle
@@ -27,7 +31,20 @@ const cityLandmarks: Record<string, string> = {
 const cities = ["Bangalore", "Chennai", "Delhi", "Gurgaon", "Hyderabad", "Mumbai", "Pune"];
 
 function useListPropertyHref() {
-  return { href: `${PORTAL_URL}/login`, label: "List your property", sub: "Start earning in 30 mins" };
+  const role = useAppSelector(selectRole);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || role !== "owner") {
+    return { href: "/register?intent=owner", label: "List your property", sub: "Start earning in 30 mins" };
+  }
+
+  // Owners manage listings in the partner portal — link there instead of the
+  // removed /owner/* routes (which proxy.ts bounces to /register → loop).
+  return { href: `${PORTAL_URL}/login`, label: "My Property", sub: "Go to partner portal" };
 }
 
 function TopBar() {
