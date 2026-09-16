@@ -74,7 +74,7 @@ export default function PropertyReviews({ propertyId }: PropertyReviewsProps) {
             <div className="flex justify-between items-start mb-2">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center font-bold text-orange-600 text-sm shrink-0">
-                  {(review.guest?.name ?? "G")[0].toUpperCase()}
+                  {(review.guest?.name?.trim() || "G")[0].toUpperCase()}
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900 text-sm">{review.guest?.name ?? "Verified Guest"}</h4>
@@ -96,7 +96,7 @@ export default function PropertyReviews({ propertyId }: PropertyReviewsProps) {
 
       {reviews.length < total && (
         <button
-          onClick={() => setPage((p) => p + 1)}
+          onClick={() => { setLoading(true); setPage((p) => p + 1); }}
           disabled={loading}
           className="w-full py-2.5 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >

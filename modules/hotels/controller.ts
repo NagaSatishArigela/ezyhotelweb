@@ -28,7 +28,7 @@ export function filterHotels(params: FilterParams) {
   }
 }
 
-/** Fetches real (Postgres-backed) properties matching the filters from quicknestserver (M4). */
+/** Fetches real (Postgres-backed) properties matching the filters from ezyhotelsserver (M4). */
 async function fetchRealProperties(params: FilterParams) {
   // rating has no data source yet (no Reviews module) - intentionally not sent, per M4 spec §1.
   try {
@@ -39,6 +39,7 @@ async function fetchRealProperties(params: FilterParams) {
       minPrice: params.minPrice ? Number(params.minPrice) * 100 : undefined,
       maxPrice: params.maxPrice ? Number(params.maxPrice) * 100 : undefined,
       amenities: params.amenities,
+      sort: params.sort === "price_asc" || params.sort === "price_desc" ? params.sort : undefined,
     });
     return result.items;
   } catch {

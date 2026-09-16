@@ -42,15 +42,14 @@ function PaymentPageInner() {
   }
 
   useEffect(() => {
-    if (!bookingId || !accessToken) {
-      setLoading(false);
-      return;
-    }
+    if (!bookingId || !accessToken) return;
+    let cancelled = false;
     bookingsApi
       .get(accessToken, bookingId)
-      .then((b) => setBooking(b))
-      .catch((e) => setError(e instanceof ApiError ? e.message : "Failed to load booking."))
-      .finally(() => setLoading(false));
+      .then((b) => { if (!cancelled) { setBooking(b); setError(null); } })
+      .catch((e) => { if (!cancelled) setError(e instanceof ApiError ? e.message : "Failed to load booking."); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [bookingId, accessToken]);
 
   if (!bookingId) {
@@ -61,7 +60,7 @@ function PaymentPageInner() {
     );
   }
 
-  if (loading) {
+  if (!accessToken || loading || (booking && booking.id !== bookingId)) {
     return <div className="min-h-screen bg-[#F8F9FA] animate-pulse" />;
   }
 
@@ -71,6 +70,10 @@ function PaymentPageInner() {
         <p className="text-gray-500">{error ?? "Booking not found."}</p>
       </div>
     );
+  }
+
+  if (booking.status !== "pending_payment") {
+    return <div className="min-h-screen flex items-center justify-center"><Link href={`/booking-confirm/${booking.id}`} className="text-orange-600">View booking status</Link></div>;
   }
 
   const totalRupees = Math.round(booking.totalAmountPaise / 100);
@@ -128,7 +131,7 @@ function PaymentPageInner() {
             href={`/booking-confirm/${bookingId}`}
             className="mt-4 inline-flex items-center justify-center text-sm font-medium text-gray-500 hover:text-gray-700"
           >
-            Pay later at the property
+            View booking status
           </Link>
         </div>
       </div>

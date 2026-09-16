@@ -10,15 +10,17 @@ export async function proxy(req: NextRequest) {
   // /owner/* routes are removed — all owner operations happen in the partner
   // portal. Redirect there instead of to /register: an authenticated owner sent
   // to /register?intent=owner is re-redirected back to /owner/* → infinite loop.
-  if (pathname.startsWith("/owner/")) {
+  if (pathname === "/owner" || pathname.startsWith("/owner/") || pathname === "/owner-auth") {
     return NextResponse.redirect(new URL("/login", PORTAL_URL));
   }
 
   // All other protected routes — any authenticated guest user
-  if (!token) return NextResponse.redirect(new URL("/login", req.url));
+  const loginUrl = new URL("/login", req.url);
+  loginUrl.searchParams.set("redirect", req.nextUrl.pathname + req.nextUrl.search);
+  if (!token) return NextResponse.redirect(loginUrl);
   const valid = await verifyAccessToken(token);
   if (!valid) {
-    const res = NextResponse.redirect(new URL("/login", req.url));
+    const res = NextResponse.redirect(loginUrl);
     res.cookies.delete("pph_session");
     return res;
   }
@@ -28,6 +30,7 @@ export async function proxy(req: NextRequest) {
 export const config = {
   matcher: [
     "/owner/:path*",
+    "/owner-auth",
     "/booking/:path*",
     "/booking-confirm/:path*",
     "/payment",

@@ -33,6 +33,7 @@ export default function RealBookingView({ propertyId }: { propertyId: string }) 
   const [property, setProperty] = useState<PublicPropertyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
@@ -103,10 +104,21 @@ export default function RealBookingView({ propertyId }: { propertyId: string }) 
   const checkOut = new Date(checkIn.getTime() + durationHours * 3600000);
   const fmt = (d: Date) => d.toLocaleString("en-IN", { day: "numeric", month: "short", year: "2-digit", hour: "numeric", minute: "2-digit", hour12: true });
 
+  const validSelection = ["hourly", "fullday"].includes(bookingType)
+    && (property.bookingPolicy === "both" || property.bookingPolicy === bookingType)
+    && ratePaise != null && ratePaise > 0
+    && Number.isInteger(guests) && guests >= 1 && guests <= (roomType.maxOccupancy ?? 10)
+    && Number.isInteger(hours) && hours >= (property.minBookingHours ?? 1) && hours <= 24
+    && Number.isFinite(checkIn.getTime());
+
   const handleProceed = async () => {
+    if (!validSelection) {
+      setSubmitError("Choose an available room, valid guest count, and future check-in time.");
+      return;
+    }
     if (!guestName || !guestPhone || !accessToken) return;
     setIsSubmitting(true);
-    setError(null);
+    setSubmitError(null);
     try {
       const booking = await bookingsApi.create(accessToken, {
         propertyId,
@@ -123,7 +135,7 @@ export default function RealBookingView({ propertyId }: { propertyId: string }) 
       });
       router.push(`/payment?bookingId=${booking.id}`);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
+      setSubmitError(e instanceof ApiError ? e.message : "Something went wrong. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -195,7 +207,7 @@ export default function RealBookingView({ propertyId }: { propertyId: string }) 
               </div>
             </div>
 
-            {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
+            {submitError && <p role="alert" className="text-sm text-red-500 font-medium">{submitError}</p>}
           </div>
 
           <div className="lg:col-span-1">

@@ -28,7 +28,10 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
   const [loading, setLoading] = useState(true);
   const [show, setShow] = useState(false);
 
-  useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setShow(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -72,6 +75,8 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
     d.toLocaleString("en-IN", { day: "numeric", month: "short", year: "2-digit", hour: "numeric", minute: "2-digit", hour12: true });
   const roomType = property.roomTypes.find((r) => r.id === booking.roomTypeId);
   const totalRupees = Math.round(booking.totalAmountPaise / 100);
+  const title = ({ voided: "Booking expired", pending_payment: "Payment pending", confirmed: "Booking Confirmed!", checked_in: "Checked in", completed: "Stay completed", cancelled: "Booking cancelled", no_show: "Booking marked as no-show" } satisfies Record<Booking["status"], string>)[booking.status];
+  const canCheckIn = booking.status === "confirmed" || booking.status === "checked_in";
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-16">
@@ -82,8 +87,8 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-500" />
           </div>
-          <h1 className="text-2xl font-black text-gray-900 mb-1">Booking Confirmed!</h1>
-          <p className="text-gray-500 text-sm">Your stay has been successfully booked. Have a great time!</p>
+          <h1 className="text-2xl font-black text-gray-900 mb-1">{title}</h1>
+          <p className="text-gray-500 text-sm">{booking.status === "pending_payment" ? "Complete payment to confirm your stay." : "View the current details of your booking below."}</p>
         </div>
 
         <div className={`bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-5 transition-all duration-500 delay-100 ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
@@ -141,18 +146,18 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
               <p className="text-sm font-bold text-gray-900 capitalize">{booking.status.replace("_", " ")}</p>
             </div>
             <div>
-              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Amount Paid</p>
+              <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Booking total</p>
               <p className="text-sm font-black text-green-600">₹{totalRupees}</p>
             </div>
           </div>
 
-          <div className="p-5 flex flex-col items-center gap-3">
+          {canCheckIn && <div className="p-5 flex flex-col items-center gap-3">
             <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Show this at check-in</p>
             <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
               <QRCode value={booking.qrCode ?? `EZY:${booking.bookingRef}:${booking.propertyId}`} size={128} level="M" />
             </div>
             <p className="text-[10px] text-gray-400 font-medium">{booking.bookingRef}</p>
-          </div>
+          </div>}
         </div>
 
         <div className={`bg-orange-50 border border-orange-100 rounded-2xl p-4 mb-5 text-xs text-gray-600 space-y-1 transition-all duration-500 delay-200 ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
@@ -161,6 +166,8 @@ export default function RealBookingConfirm({ bookingId }: { bookingId: string })
           <p>• Show QR code or booking reference at front desk</p>
           <p>• Arrive within 30 mins of check-in time to hold room</p>
         </div>
+
+        {booking.status === "pending_payment" && <Link href={`/payment?bookingId=${booking.id}`} className="block text-center text-orange-600 font-bold mb-5">Complete payment</Link>}
 
         {/* Status badge — check-in/check-out is a staff operation at the front desk */}
         {(booking.status === "confirmed" || booking.status === "checked_in") && (

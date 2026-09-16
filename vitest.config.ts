@@ -7,8 +7,6 @@ export default defineConfig({
     environment: "node",
     globals: true,
     include: ["__tests__/**/*.test.ts"],
-    // Exclude files that import Next.js server modules or react-qr-code
-    exclude: ["__tests__/lib/api.test.ts"],
   },
   resolve: {
     alias: {

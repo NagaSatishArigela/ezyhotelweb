@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { publicPropertiesApi } from "@/lib/api";
 
+export const revalidate = 3600;
+
 const BASE = "https://ezyhotels.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -21,7 +23,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: BASE, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${BASE}/hotels`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE}/login`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
+    { url: `${BASE}/terms`, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${BASE}/privacy`, changeFrequency: "monthly", priority: 0.3 },
     ...propertyUrls,
   ];
 }

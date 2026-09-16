@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: ["/", "/hotels", "/hotels/"],
-        disallow: ["/api/", "/login", "/register", "/booking/", "/my-bookings", "/profile", "/sso"],
+        disallow: ["/api/", "/login", "/register", "/booking/", "/booking-confirm/", "/payment", "/owner", "/my-bookings", "/profile", "/sso"],
       },
     ],
     sitemap: "https://ezyhotels.com/sitemap.xml",

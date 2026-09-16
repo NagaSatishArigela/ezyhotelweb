@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
 
 // ── Request helper ──────────────────────────────────────────────────────────
 
@@ -7,12 +8,7 @@ async function request<T>(
   options: RequestInit = {},
   accessToken?: string
 ): Promise<T> {
-  const callerHeaders: Record<string, string> =
-    options.headers && typeof options.headers === "object" && !Array.isArray(options.headers)
-      ? Object.fromEntries(
-          Object.entries(options.headers).filter(([, v]) => typeof v === "string")
-        )
-      : {};
+  const callerHeaders = Object.fromEntries(new Headers(options.headers).entries());
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...callerHeaders,
@@ -22,7 +18,9 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options, headers, signal: options.signal ?? AbortSignal.timeout(15_000),
+  });
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -32,6 +30,7 @@ async function request<T>(
     throw new ApiError(res.status, message);
   }
 
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
@@ -45,7 +44,7 @@ export class ApiError extends Error {
   }
 }
 
-// ── Response types (matching quicknestserver contract) ─────────────────────
+// ── Response types (matching ezyhotelsserver contract) ─────────────────────
 
 export interface AuthTokens {
   accessToken: string;
@@ -72,6 +71,7 @@ export interface SendOtpResponse {
   message: string;
   expiresIn: number;
   resendAfter: number;
+  otp?: string;
 }
 
 // POST /auth/verify-otp — two possible shapes
@@ -106,14 +106,6 @@ export interface MeResponse {
   phone: string;
   email: string;
   globalRole: "USER" | "ADMIN" | "SUPER_ADMIN";
-}
-
-// GET /me/onboarding
-export interface OnboardingResponse {
-  status: "READY" | "NOT_APPLICABLE";
-  canOnboardProperty: boolean;
-  isAdmin: boolean;
-  nextStep: "CREATE_PROPERTY" | "ADMIN_DASHBOARD";
 }
 
 // ── Auth API ───────────────────────────────────────────────────────────────
@@ -155,10 +147,6 @@ export const authApi = {
     return request("/auth/me", { method: "GET" }, accessToken);
   },
 
-  onboarding(accessToken: string): Promise<OnboardingResponse> {
-    return request("/me/onboarding", { method: "GET" }, accessToken);
-  },
-
   // Response is flat AuthTokens (not wrapped in { tokens: ... })
   refreshToken(refreshToken: string): Promise<AuthTokens> {
     return request("/auth/refresh-token", {
@@ -175,162 +163,6 @@ export const authApi = {
     );
   },
 };
-
-// ── Properties (owner onboarding) API ───────────────────────────────────────
-
-export type PropertyStatus =
-  | "draft"
-  | "pending_review"
-  | "needs_revision"
-  | "approved"
-  | "rejected"
-  | "suspended";
-
-// Mirrors Prisma's DocumentType enum (compliance schema)
-export type DocumentType =
-  | "owner_photo"
-  | "id_proof"
-  | "pan_card"
-  | "gstin_certificate"
-  | "rental_agreement"
-  | "fire_safety_cert"
-  | "fssai_license"
-  | "trade_license"
-  | "other";
-
-export interface PropertyDocumentWizardDto {
-  type: DocumentType;
-  url: string;
-  expiresAt?: string;
-}
-
-export interface ComplianceDocumentSummary {
-  type: string;
-  status: string;
-  expiresAt: string | null;
-}
-
-export interface ComplianceSummary {
-  legalBusinessName: string;
-  gstinMasked: string;
-  panMasked: string;
-  bankAccountNumberMasked: string;
-  ifsc: string;
-  accountHolderName: string;
-  documents: ComplianceDocumentSummary[];
-}
-
-// POST /properties/draft
-export interface CreateDraftResult {
-  propertyId: string;
-}
-
-// GET /properties/:id/draft
-export interface DraftView {
-  propertyId: string;
-  status: PropertyStatus;
-  draftStep: number | null;
-  draftData: Record<string, unknown>;
-  compliance: ComplianceSummary | null;
-}
-
-// PATCH /properties/:id/step/:stepNum
-export interface SaveStepResult {
-  propertyId: string;
-  draftStep: number | null;
-  draftData: Record<string, unknown>;
-  compliance?: ComplianceSummary;
-}
-
-// POST /properties/:id/submit, PATCH /properties/:id/revise
-export interface SubmitResult {
-  propertyId: string;
-  status: PropertyStatus;
-  submissionRef: string;
-  submittedAt: string;
-}
-
-export interface TimelineEntry {
-  label: string;
-  status: "done" | "current" | "pending";
-  at: string | null;
-}
-
-// GET /properties/:id/status
-export interface StatusView {
-  status: PropertyStatus;
-  submissionRef: string | null;
-  submittedAt: string | null;
-  revisionCount: number;
-  revisionNotes: unknown;
-  timeline: TimelineEntry[];
-}
-
-export const propertiesApi = {
-  createDraft(accessToken: string): Promise<CreateDraftResult> {
-    return request("/properties/draft", { method: "POST" }, accessToken);
-  },
-
-  getDraft(accessToken: string, propertyId: string): Promise<DraftView> {
-    return request(`/properties/${propertyId}/draft`, { method: "GET" }, accessToken);
-  },
-
-  saveStep(
-    accessToken: string,
-    propertyId: string,
-    stepNum: number,
-    data: object
-  ): Promise<SaveStepResult> {
-    return request(
-      `/properties/${propertyId}/step/${stepNum}`,
-      { method: "PATCH", body: JSON.stringify(data) },
-      accessToken
-    );
-  },
-
-  submit(accessToken: string, propertyId: string): Promise<SubmitResult> {
-    return request(`/properties/${propertyId}/submit`, { method: "POST" }, accessToken);
-  },
-
-  getStatus(accessToken: string, propertyId: string): Promise<StatusView> {
-    return request(`/properties/${propertyId}/status`, { method: "GET" }, accessToken);
-  },
-
-  revise(accessToken: string, propertyId: string): Promise<SubmitResult> {
-    return request(`/properties/${propertyId}/revise`, { method: "PATCH" }, accessToken);
-  },
-};
-
-// ── Owner Notifications API ─────────────────────────────────────────────────
-
-export type NotificationType =
-  | "status_change"
-  | "revision_request"
-  | "approval"
-  | "rejection"
-  | "document_verified"
-  | "general";
-
-export interface OwnerNotification {
-  id: string;
-  ownerId: string;
-  propertyId: string | null;
-  type: NotificationType;
-  title: string;
-  body: string;
-  actionUrl: string | null;
-  isRead: boolean;
-  createdAt: string;
-}
-
-// GET /owners/me/notifications
-export interface NotificationListResult {
-  items: OwnerNotification[];
-  total: number;
-  page: number;
-  limit: number;
-  unreadCount: number;
-}
 
 // ── Public Properties (guest discovery) API ────────────────────────────────
 
@@ -595,32 +427,6 @@ export const bookingsApi = {
     if (params.limit) query.set("limit", String(params.limit));
     const qs = query.toString();
     return request(`/me/bookings${qs ? `?${qs}` : ""}`, { method: "GET" }, accessToken);
-  },
-};
-
-export const notificationsApi = {
-  list(
-    accessToken: string,
-    params: { unread?: boolean; page?: number; limit?: number } = {}
-  ): Promise<NotificationListResult> {
-    const query = new URLSearchParams();
-    if (params.unread) query.set("unread", "true");
-    if (params.page) query.set("page", String(params.page));
-    if (params.limit) query.set("limit", String(params.limit));
-    const qs = query.toString();
-    return request(
-      `/owners/me/notifications${qs ? `?${qs}` : ""}`,
-      { method: "GET" },
-      accessToken
-    );
-  },
-
-  markRead(accessToken: string, notificationId: string): Promise<OwnerNotification> {
-    return request(
-      `/owners/me/notifications/${notificationId}/read`,
-      { method: "PATCH" },
-      accessToken
-    );
   },
 };
 

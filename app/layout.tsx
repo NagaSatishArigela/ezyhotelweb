@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { StoreProvider } from "@/components/client/StoreProvider";
 import { Header } from "@/components/client/Header";
@@ -8,10 +8,9 @@ import BackToTop from "@/components/client/BackToTop";
 import { AuthRestorer } from "@/components/client/AuthRestorer";
 import { AuthRefresher } from "@/components/client/AuthRefresher";
 
-// 3 weights only — removes ~80KB of font data vs 5 weights
-const plusJakartaSans = Plus_Jakarta_Sans({
-  weight: ["400", "600", "800"],
-  subsets: ["latin"],
+const plusJakartaSans = localFont({
+  src: "../public/fonts/PlusJakartaSans.ttf",
+  weight: "200 800",
   variable: "--font-plus-jakarta-sans",
   display: "swap",
   preload: true,

@@ -99,7 +99,7 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
             </div>
           )}
 
-          <PropertyReviews propertyId={property.id} />
+          <PropertyReviews key={property.id} propertyId={property.id} />
 
           <div className="bg-white p-4 lg:p-8 rounded-xl border border-gray-100 shadow-sm space-y-6">
             <div className="space-y-2">
@@ -121,7 +121,7 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
         </div>
 
         <div className="lg:col-span-4" id="booking">
-          <RealHotelBookingPanel
+          <RealHotelBookingPanel key={property.id}
             propertyId={property.id}
             roomTypes={property.roomTypes}
             bookingPolicy={property.bookingPolicy}
