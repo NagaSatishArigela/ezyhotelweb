@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { loadAuth } from "@/lib/persist";
 import authReducer, { setUser } from "./authSlice";
 
 export const store = configureStore({
@@ -15,9 +16,9 @@ if (typeof window !== "undefined") {
   // state and bounce to /login on a full page load.
   try {
     localStorage.removeItem("pph_onboarding");
-    const rawAuth = localStorage.getItem("pph_auth");
-    if (rawAuth) {
-      const { user, role } = JSON.parse(rawAuth);
+    const savedAuth = loadAuth();
+    if (savedAuth) {
+      const { user, role } = savedAuth;
       if (user && role) {
         // Tokens are never persisted to localStorage (XSS protection).
         // AuthRestorer will call GET /api/auth/me to recover the token from

@@ -12,7 +12,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
-import { selectUser, selectRole, selectIsAuthenticated } from "@/store/selectors/authSelectors";
+import { selectUser, selectIsAuthenticated } from "@/store/selectors/authSelectors";
 import { useHydrated } from "@/modules/auth/hooks/useHydrated";
 import { useAuthState } from "@/modules/auth/hooks/useAuthState";
 
@@ -20,7 +20,6 @@ export default function ProfilePage() {
   const hydrated = useHydrated();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const user = useAppSelector(selectUser);
-  const role = useAppSelector(selectRole);
   const { logout } = useAuthState();
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export default function ProfilePage() {
 
   const displayName = user.name?.trim() || user.email?.split("@")[0] || "User";
   const initial = displayName.charAt(0).toUpperCase();
-  const isOwner = role === "owner";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,11 +42,9 @@ export default function ProfilePage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-gray-900">{displayName}</h1>
-            <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full mt-1 ${
-              isOwner ? "bg-orange-100 text-orange-700" : "bg-blue-100 text-blue-700"
-            }`}>
-              {isOwner ? <Building2 className="w-3 h-3" /> : <User className="w-3 h-3" />}
-              {isOwner ? "Property Owner" : "Guest"}
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full mt-1 bg-blue-100 text-blue-700">
+              <User className="w-3 h-3" />
+              Customer
             </span>
           </div>
         </div>
