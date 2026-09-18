@@ -53,11 +53,13 @@ export interface AuthTokens {
   expiresIn: number; // seconds — 900 for access token
 }
 
+export type GlobalRole = "USER" | "ADMIN" | "SUPER_ADMIN" | "SUPPORT";
+
 export interface ServerUser {
   id: string;
   phone: string;
   email: string;
-  globalRole: "USER" | "ADMIN" | "SUPER_ADMIN";
+  globalRole: GlobalRole;
   isPhoneVerified: boolean;
   isEmailVerified: boolean;
   status: "active" | "suspended" | "deleted";
@@ -105,7 +107,7 @@ export interface MeResponse {
   id: string;
   phone: string;
   email: string;
-  globalRole: "USER" | "ADMIN" | "SUPER_ADMIN";
+  globalRole: GlobalRole;
 }
 
 // ── Auth API ───────────────────────────────────────────────────────────────
