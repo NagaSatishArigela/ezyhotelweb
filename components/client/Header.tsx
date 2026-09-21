@@ -10,7 +10,7 @@ import { EzyLogo } from "@/components/brand/EzyLogo";
 import { useAuthState } from "@/modules/auth/hooks/useAuthState";
 import { useHydrated } from "@/modules/auth/hooks/useHydrated";
 
-const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
+import { PORTAL_URL } from "@/lib/portal";
 
 // framer-motion only loads when menu opens — keeps it out of the initial bundle
 const MobileDrawer = dynamic(() => import("@/components/client/MobileDrawer"), { ssr: false });
