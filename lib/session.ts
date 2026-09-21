@@ -8,9 +8,9 @@ export async function verifyAccessToken(token: string): Promise<boolean> {
       await jwtVerify(token, new TextEncoder().encode(secret), {
         algorithms: ["HS256"], requiredClaims: ["exp"],
       });
-      return true;
+      // Signature validity alone does not prove the session is still active.
     }
-    // Without the signing key, delegate verification to the backend.
+    // Always consult the backend for session revocation and account status.
     // Never trust an expiry decoded from an unverified JWT.
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
     const response = await fetch(apiUrl + "/auth/me", {
