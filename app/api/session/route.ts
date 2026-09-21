@@ -51,7 +51,19 @@ export async function POST(req: NextRequest) {
   return res;
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
+  // The refresh cookie remains available after reload even when Redux has no refresh token.
+  const refreshToken = req.cookies.get('pph_refresh')?.value;
+  if (refreshToken) {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'https://ezyhotelserver-production.up.railway.app';
+      const upstream = await fetch(apiUrl + '/auth/logout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }), signal: AbortSignal.timeout(10000),
+      });
+      if (!upstream.ok && upstream.status !== 401) return NextResponse.json({ error: 'Unable to revoke session. Please retry.' }, { status: 502 });
+    } catch { return NextResponse.json({ error: 'Unable to revoke session. Please retry.' }, { status: 502 }); }
+  }
   const res = NextResponse.json({ ok: true });
   res.cookies.delete("pph_session");
   res.cookies.delete("pph_refresh");

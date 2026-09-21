@@ -188,13 +188,13 @@ export default function RealHotelBookingPanel({
               {bookingType === "hourly" && (
                 <div className="space-y-2 px-1">
                   <div className="flex justify-between items-end">
-                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Duration</label>
+                    <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em]">Duration</label>
                     <div className="text-right">
                       <span className="text-2xl font-black text-gray-900 tracking-tighter">{selectedHours}</span>
                       <span className="text-xs font-black text-gray-400 uppercase ml-1">Hrs</span>
                     </div>
                   </div>
-                  <Slider
+                  <Slider aria-label="Stay duration in hours"
                     value={[selectedHours]}
                     onValueChange={(v) => setSelectedHours(v[0])}
                     min={minBookingHours ?? 1}
@@ -202,7 +202,7 @@ export default function RealHotelBookingPanel({
                     step={1}
                     className="cursor-pointer py-3"
                   />
-                  <div className="flex justify-between text-[9px] font-black text-gray-300 uppercase tracking-widest">
+                  <div className="flex justify-between text-[9px] font-black text-gray-600 uppercase tracking-widest">
                     <span>Min {minBookingHours ?? 1}h</span><span>Max 24h</span>
                   </div>
                 </div>
