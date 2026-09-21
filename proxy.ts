@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAccessToken } from "@/lib/session";
 
-const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
+import { PORTAL_URL } from "@/lib/portal";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;

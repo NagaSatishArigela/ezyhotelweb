@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { verifyAccessToken } from "@/lib/session";
+import { PORTAL_URL } from "@/lib/portal";
 
 // The partner portal is a different origin, so the redeem (GET) endpoint must be
 // CORS-callable from it. PILOT HARDENING: move this store to the backend (Redis)
 // and redeem server-to-server so it survives restarts and multi-instance — this
 // in-memory Map is single-instance/dev only.
-const PORTAL_ORIGIN = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
+const PORTAL_ORIGIN = PORTAL_URL;
 
 function corsHeaders(): Record<string, string> {
   return {

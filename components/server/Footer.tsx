@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PORTAL_URL } from "@/lib/portal";
 import { EzyMark } from "@/components/brand/EzyLogo";
 
 
@@ -42,7 +43,7 @@ export function Footer() {
           <div>
             <h5 className="text-lg font-bold mb-6">List your property</h5>
             <p className="text-gray-400 mb-4">Manage your property and bookings in our partner portal.</p>
-            <a href={`${process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000"}/login`} className="text-brand-orange hover:underline">Open partner portal</a>
+            <a href={`${PORTAL_URL}/login`} className="text-brand-orange hover:underline">Open partner portal</a>
           </div>
         </div>
 

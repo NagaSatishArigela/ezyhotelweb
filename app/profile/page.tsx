@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { PORTAL_URL } from "@/lib/portal";
 import {
   User,
   Mail,
@@ -83,7 +84,7 @@ export default function ProfilePage() {
           </Link>
 
           <a
-            href={`${process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000"}/login`}
+            href={`${PORTAL_URL}/login`}
             className="flex items-center justify-between px-6 py-4 hover:bg-orange-50 transition-colors"
           >
             <div className="flex items-center gap-3 text-sm font-medium text-gray-700">
