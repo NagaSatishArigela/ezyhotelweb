@@ -28,7 +28,7 @@ const cityLandmarks: Record<string, string> = {
 const cities = ["Bangalore", "Chennai", "Delhi", "Gurgaon", "Hyderabad", "Mumbai", "Pune"];
 
 function useListPropertyHref() {
-  return { href: `${PORTAL_URL}/login`, label: "List your property", sub: "Start earning in 30 mins" };
+  return { href: `${PORTAL_URL}/list-property`, label: "List your property", sub: "Start earning in 30 mins" };
 }
 
 function TopBar() {

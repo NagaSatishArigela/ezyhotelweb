@@ -1,17 +1,8 @@
-import { jwtVerify } from "jose";
-
 export async function verifyAccessToken(token: string): Promise<boolean> {
   if (token === "dev-access-token") return process.env.NODE_ENV === "development";
   try {
-    const secret = process.env.JWT_SECRET;
-    if (secret) {
-      await jwtVerify(token, new TextEncoder().encode(secret), {
-        algorithms: ["HS256"], requiredClaims: ["exp"],
-      });
-      // Signature validity alone does not prove the session is still active.
-    }
-    // Always consult the backend for session revocation and account status.
-    // Never trust an expiry decoded from an unverified JWT.
+    // The backend owns the JWT signing secret and session revocation state.
+    // Validate Railway-issued tokens through its authenticated endpoint.
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
     const response = await fetch(apiUrl + "/auth/me", {
       headers: { Authorization: "Bearer " + token },
