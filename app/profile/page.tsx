@@ -84,7 +84,7 @@ export default function ProfilePage() {
           </Link>
 
           <a
-            href={`${PORTAL_URL}/login`}
+            href={`${PORTAL_URL}/list-property`}
             className="flex items-center justify-between px-6 py-4 hover:bg-orange-50 transition-colors"
           >
             <div className="flex items-center gap-3 text-sm font-medium text-gray-700">

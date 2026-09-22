@@ -24,7 +24,7 @@ for (const path of ['/login', '/register', '/terms', '/privacy']) {
 test('property entry points go directly to the portal', async ({ page }) => {
   await page.goto('/');
   const propertyLink = page.getByRole('link', { name: /List your property/ }).first();
-  await expect(propertyLink).toHaveAttribute('href', /https?:\/\/[^\s]+\/login/);
+  await expect(propertyLink).toHaveAttribute('href', /https?:\/\/[^\s]+\/list-property/);
 });
 
 test('protected routes preserve the destination through login', async ({ request }) => {
@@ -39,6 +39,6 @@ test('legacy owner routes redirect to the portal', async ({ request }) => {
   for (const path of ['/owner', '/owner/onboarding/basics', '/owner-auth']) {
     const response = await request.get(path, { maxRedirects: 0 });
     expect(response.status()).toBe(307);
-    expect(new URL(response.headers().location).pathname).toBe('/login');
+    expect(new URL(response.headers().location).pathname).toBe('/list-property');
   }
 });
