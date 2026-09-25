@@ -7,7 +7,7 @@ const destinations = ["Bangalore", "Mumbai", "Delhi", "Hyderabad", "Chennai"];
 
 export function HeroSection() {
   return (
-    <section className="relative h-[65vh] md:min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[65vh] py-12 md:min-h-screen flex items-center justify-center overflow-hidden">
       {/* Hero image — LCP element: priority + fill */}
       <Image
         src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80"
