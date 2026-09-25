@@ -11,6 +11,7 @@ import { useAuthState } from "@/modules/auth/hooks/useAuthState";
 import { useHydrated } from "@/modules/auth/hooks/useHydrated";
 
 import { PORTAL_URL } from "@/lib/portal";
+import pillStyles from "@/components/brand/NavigationPill.module.css";
 
 // framer-motion only loads when menu opens — keeps it out of the initial bundle
 const MobileDrawer = dynamic(() => import("@/components/client/MobileDrawer"), { ssr: false });
@@ -124,11 +125,11 @@ function TopBar() {
 
 function CityNavigation() {
   return (
-    <div className="bg-orange-50 border-b border-orange-200 hidden md:block">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
-        <nav className="flex items-center gap-8 overflow-x-auto scrollbar-hide" aria-label="Browse by city">
+    <div className="bg-orange-50 border-b border-orange-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <nav className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto py-3 px-1" aria-label="Browse by city">
           {cities.map((city) => (
-            <Link key={city} href={`/hotels?city=${city}`} className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors whitespace-nowrap group">
+            <Link key={city} href={`/hotels?city=${city}`} className={`${pillStyles.pill} text-sm`}>
               <Image src={cityLandmarks[city]} alt={`${city} landmark`} width={24} height={24} className="object-contain rounded opacity-80 group-hover:opacity-100 transition" />
               <span>{city}</span>
             </Link>
