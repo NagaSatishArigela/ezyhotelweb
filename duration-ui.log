@@ -1,0 +1,15 @@
+
+> payperhour-next@0.1.0 dev
+> next dev -p 3001
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.1.3:3001
+- Environments: .env.local
+✓ Ready in 841ms
+Creating turbopack project { dir: 'D:\\Ezyhotels\\ezyhotelweb', testMode: true }
+- Experiments (use with caution):
+  · optimizePackageImports
+
+ GET /hotels/1 200 in 1776ms (next.js: 732ms, generate-params: 526ms, application-code: 1044ms)
+✓ Compiled in 168ms

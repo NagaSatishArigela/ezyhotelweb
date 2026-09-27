@@ -25,8 +25,10 @@ async function request<T>(
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     // NestJS can return message as a string or string[] (validation errors)
-    const raw = body?.message ?? body?.error ?? `Request failed: ${res.status}`;
-    const message: string = Array.isArray(raw) ? raw[0] : String(raw);
+    const raw = body?.error?.message ?? body?.message ?? body?.error;
+    const message = typeof raw === 'string' ? raw : Array.isArray(raw)
+      ? raw.filter((item: unknown) => typeof item === 'string').join(', ')
+      : `Request failed: ${res.status}`;
     throw new ApiError(res.status, message);
   }
 

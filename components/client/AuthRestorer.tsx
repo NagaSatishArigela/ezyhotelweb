@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { refreshWebSession } from '@/lib/refresh-session';
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { selectUser, selectRole, selectAccessToken } from "@/store/selectors/authSelectors";
 import { setUser, clearUser } from "@/store/authSlice";
@@ -27,8 +28,9 @@ export function AuthRestorer() {
         accessToken = (await meRes.json()).accessToken ?? null;
       } else {
         // Access cookie expired — try the refresh cookie before giving up.
-        const refreshRes = await fetch("/api/auth/refresh", { method: "POST" });
-        if (refreshRes.ok) accessToken = (await refreshRes.json()).accessToken ?? null;
+        const refreshRes = await refreshWebSession();
+        if (refreshRes.accessToken) accessToken = refreshRes.accessToken;
+        else if (refreshRes.status !== 401 && refreshRes.status !== 403) return;
       }
 
       if (accessToken) {
@@ -38,7 +40,7 @@ export function AuthRestorer() {
       }
     };
 
-    restore().catch(() => dispatch(clearUser()));
+    restore().catch(() => { /* Preserve the session during a temporary network outage. */ });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

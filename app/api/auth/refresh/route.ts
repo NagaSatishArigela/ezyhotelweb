@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAccessToken } from "@/lib/session";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
@@ -21,6 +20,9 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ refreshToken }),
     });
     if (!upstream.ok) {
+      if (upstream.status !== 401 && upstream.status !== 403) {
+        return NextResponse.json({ error: 'Refresh temporarily unavailable' }, { status: upstream.status === 429 ? 429 : 502 });
+      }
       const res = NextResponse.json({ error: "Refresh rejected" }, { status: 401 });
       res.cookies.delete("pph_session");
       res.cookies.delete("pph_refresh");
@@ -31,7 +33,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Refresh unavailable" }, { status: 502 });
   }
 
-  if (!tokens?.accessToken || !(await verifyAccessToken(tokens.accessToken))) {
+  // This trusted endpoint has already validated and rotated the refresh token.
+  // A second /auth/me request could fail after rotation and strand the old cookie.
+  if (typeof tokens?.accessToken !== 'string' || !tokens.accessToken || typeof tokens.refreshToken !== 'string' || !tokens.refreshToken) {
     return NextResponse.json({ error: "Invalid refreshed token" }, { status: 502 });
   }
 
