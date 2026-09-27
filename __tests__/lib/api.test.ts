@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Minimal test for E19 — header cast safety and error serialisation
 describe("fetch helper", () => {
+  it('shows the backend reason for OTP rejection instead of an object string', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ success: false, error: { message: 'User account is not active' } }), { status: 403 })));
+    const { authApi } = await import('@/lib/api');
+    await expect(authApi.verifyOtp('9000000001', '123456')).rejects.toThrow('User account is not active');
+  });
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
   });
