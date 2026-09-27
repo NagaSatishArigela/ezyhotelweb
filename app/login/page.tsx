@@ -13,19 +13,11 @@ import { authApi, ApiError } from "@/lib/api";
 import { safeInternalRedirect } from "@/lib/navigation";
 import { clearAuth, saveAuthImmediate } from "@/lib/persist";
 
-const DEV_LOGIN_EMAIL = "dev@example.com";
-const DEV_LOGIN_PASSWORD = "Dev@12345";
-
-
-function isDevMode() {
-  return process.env.NODE_ENV !== "production";
-}
-
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [email, setEmail] = useState(isDevMode() ? DEV_LOGIN_EMAIL : "");
-  const [password, setPassword] = useState(isDevMode() ? DEV_LOGIN_PASSWORD : "");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [fieldError, setFieldError] = useState("");
 
   const dispatch = useAppDispatch();
@@ -79,20 +71,7 @@ function LoginForm() {
     setIsSubmitting(true);
     dispatch(setLoading(true));
     try {
-      let result: { user: { email: string }; tokens: { accessToken: string; refreshToken: string } };
-
-      if (isDevMode() && email === DEV_LOGIN_EMAIL && password === DEV_LOGIN_PASSWORD) {
-        result = {
-          user: { email: DEV_LOGIN_EMAIL },
-          tokens: {
-            accessToken: "dev-access-token",
-            refreshToken: "dev-refresh-token",
-          },
-        };
-      } else {
-        result = await authApi.login(email, password);
-      }
-
+      const result = await authApi.login(email, password);
       const { user, tokens } = result;
 
       // Store access token in httpOnly cookie for proxy.ts
@@ -217,20 +196,6 @@ function LoginForm() {
               )}
 
               {/* Forgot password not yet implemented in backend */}
-
-              {isDevMode() && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail(DEV_LOGIN_EMAIL);
-                    setPassword(DEV_LOGIN_PASSWORD);
-                    setFieldError("");
-                  }}
-                  className="w-full py-2.5 border border-amber-300 bg-amber-50 text-amber-800 rounded-xl font-semibold text-sm transition hover:bg-amber-100"
-                >
-                  Use Dev Login
-                </button>
-              )}
 
               <button
                 type="submit"
