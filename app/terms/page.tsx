@@ -56,6 +56,13 @@ export default function TermsPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Terms &amp; Conditions</h1>
         <p className="text-sm text-gray-500 mb-8">Last updated: 23 July 2026</p>
 
+        <p className="mb-8 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-gray-700">
+          Listing a property? Read the{" "}
+          <Link href="/partner-terms" className="font-semibold text-orange-700 underline underline-offset-4">
+            Partner Terms &amp; Conditions and Property Listing Legal Declaration
+          </Link>.
+        </p>
+
         <div className="space-y-8">
           {sections.map((section) => (
             <section key={section.heading} className="space-y-2">
