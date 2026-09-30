@@ -26,7 +26,7 @@ export function Footer() {
             <h5 className="text-lg font-bold mb-6">Explore</h5>
             <ul className="space-y-4 text-gray-400 font-medium">
               <li><Link href="/hotels" className="hover:text-brand-orange transition-colors">Featured Hotels</Link></li>
-              <li><a href="/#trending-cities" className="hover:text-brand-orange transition-colors">Trending Cities</a></li>
+              <li><Link href="/#trending-cities" className="hover:text-brand-orange transition-colors">Trending Cities</Link></li>
             </ul>
           </div>
 
@@ -36,6 +36,7 @@ export function Footer() {
               <li><a href="mailto:support@ezyhotels.com" className="hover:text-brand-orange transition-colors">Get help</a></li>
               <li><a href="tel:+919492691010" className="hover:text-brand-orange transition-colors">Contact Us</a></li>
               <li><Link href="/terms" className="hover:text-brand-orange transition-colors">Terms of Service</Link></li>
+              <li><Link href="/partner-terms" className="hover:text-brand-orange transition-colors">Partner Terms &amp; Conditions</Link></li>
               <li><Link href="/privacy" className="hover:text-brand-orange transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
