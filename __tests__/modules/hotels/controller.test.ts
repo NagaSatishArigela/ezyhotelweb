@@ -2,6 +2,10 @@ import { describe, it, expect } from "vitest";
 import { filterHotels } from "@/modules/hotels/controller";
 
 describe("filterHotels", () => {
+  it("matches canonical amenity filters against legacy listing labels", () => {
+    expect(filterHotels({ amenities: "wifi" })).toEqual(filterHotels({ amenities: "WiFi" }));
+    expect(filterHotels({ amenities: "ac,parking" })).toEqual(filterHotels({ amenities: "AC,Parking" }));
+  });
   it("returns all hotels when no filters applied", () => {
     const result = filterHotels({});
     expect(result.length).toBeGreaterThan(0);

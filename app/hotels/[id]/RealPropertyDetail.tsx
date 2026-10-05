@@ -4,6 +4,8 @@ import type { PublicPropertyDetail } from "@/lib/api";
 import { HotelGalleryLazy as HotelGallery, RealHotelBookingPanelLazy as RealHotelBookingPanel } from "@/components/client/HotelDetailLoaders";
 import HotelLocationMap from "@/components/client/HotelLocationMap";
 import PropertyReviews from "@/components/client/PropertyReviews";
+import { amenityLabel } from "@/lib/amenity-catalog";
+import { detailGroups, PROPERTY_TYPE_OPTIONS } from "@/lib/property-details";
 
 const AMENITY_ICONS: Record<string, React.ElementType> = {
   WiFi: Wifi,
@@ -31,6 +33,7 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
 
   const bookingPolicyLabel =
     property.bookingPolicy === "hourly" ? "Hourly" : property.bookingPolicy === "fullday" ? "Full Day" : "Hourly & Full Day";
+  const propertyTypeLabel = PROPERTY_TYPE_OPTIONS.find(type => type.value === property.propertyType)?.label;
 
   return (
     <div className="bg-[#F8F9FA] min-h-screen pb-20 font-sans text-gray-900">
@@ -54,6 +57,11 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
             <div className="space-y-2">
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{property.name}</h1>
               <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+                {propertyTypeLabel && (
+                  <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded text-[10px] font-bold border border-orange-100 uppercase">
+                    {propertyTypeLabel}
+                  </span>
+                )}
                 {property.category && (
                   <span className="bg-[#E8F5E9] text-[#2E7D32] px-2 py-0.5 rounded text-[10px] font-bold border border-[#C8E6C9] flex items-center gap-1 uppercase">
                     <Zap className="w-3 h-3 fill-[#2E7D32]" /> {property.category}
@@ -82,13 +90,26 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
                   return (
                     <div key={amenity} className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-orange-200 transition-colors">
                       <Icon className="w-5 h-5 text-orange-600 shrink-0" />
-                      <span className="text-sm font-bold text-gray-700">{amenity}</span>
+                      <span className="text-sm font-bold text-gray-700">{amenityLabel(amenity)}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
           )}
+
+          {detailGroups(property.propertyType ?? "").map(group => {
+            const fields = group.fields.filter(field => property.propertyDetails?.[field.id] !== undefined);
+            if (!fields.length) return null;
+            return <section key={group.title} className="bg-white p-4 lg:p-8 rounded-xl border border-gray-100 shadow-sm">
+              <h2 className="text-xl font-bold mb-4">{group.title}</h2>
+              <dl className="grid gap-4 sm:grid-cols-2">{fields.map(field => {
+                const value = property.propertyDetails?.[field.id];
+                return <div key={field.id}><dt className="text-sm font-semibold">{field.label}</dt>
+                  <dd className="text-sm text-gray-600">{Array.isArray(value) ? value.join(", ") : typeof value === "boolean" ? value ? "Yes" : "No" : String(value)}</dd></div>;
+              })}</dl>
+            </section>;
+          })}
 
           {property.latitude != null && property.longitude != null && (
             <div className="bg-white p-4 lg:p-8 rounded-xl border border-gray-100 shadow-sm space-y-6">

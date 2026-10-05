@@ -173,10 +173,15 @@ export const authApi = {
 export type PublicPropertyType =
   | "hotel"
   | "resort"
+  | "guest_house"
   | "homestay"
   | "villa"
   | "pg"
-  | "farm";
+  | "farm"
+  | "lodge"
+  | "dormitory"
+  | "banquet"
+  | "other";
 
 export type PublicPropertyCategory = "budget" | "mid" | "premium";
 
@@ -216,6 +221,7 @@ export interface PublicPhoto {
 }
 
 export interface PublicPropertyDetail extends PublicPropertySummary {
+  propertyDetails?: Record<string, unknown> | null;
   addressLine1: string | null;
   addressLine2: string | null;
   state: string | null;
