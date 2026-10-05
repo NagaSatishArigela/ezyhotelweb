@@ -1,5 +1,6 @@
 import type { Hotel, HotelCardViewModel } from "@/types";
 import type { PublicPropertySummary } from "@/lib/api";
+import { amenityLabel } from "@/lib/amenity-catalog";
 
 export function toHotelCardViewModel(hotel: Hotel): HotelCardViewModel {
   const basePrice = hotel.price;
@@ -47,7 +48,7 @@ export function toRealPropertyCardViewModel(property: PublicPropertySummary): Ho
     originalPriceLabel: "",
     ratingLabel: "New",
     reviewsLabel: "New listing",
-    amenityBadges: property.amenities.slice(0, 3),
+    amenityBadges: property.amenities.slice(0, 3).map(amenityLabel),
     hasMoreAmenities: property.amenities.length > 3,
     imageUrl: property.primaryImageUrl ?? PLACEHOLDER_IMAGE,
     isCoupleFriendly: property.amenities.some((a) => a.toLowerCase().includes("couple")),
