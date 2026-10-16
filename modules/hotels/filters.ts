@@ -1,3 +1,4 @@
+import { PROPERTY_TYPES } from "@/lib/accommodation";
 import type { FilterParams } from "@/types";
 
 export function normalizeFilters(raw: Record<string, string | string[] | undefined>): FilterParams {
@@ -9,6 +10,9 @@ export function normalizeFilters(raw: Record<string, string | string[] | undefin
     if (["minPrice", "maxPrice", "rating"].includes(key) && (!Number.isFinite(Number(value)) || Number(value) < 0)) continue;
     result[key] = value;
   }
+  const rawType = Array.isArray(raw.propertyType) ? raw.propertyType[0] : raw.propertyType;
+  const type = PROPERTY_TYPES.find((type) => type.value === rawType);
+  if (type) result.propertyType = type.value;
   const sort = Array.isArray(raw.sort) ? raw.sort[0] : raw.sort;
   if (sort === "price_asc" || sort === "price_desc" || sort === "rating_desc" || sort === "relevance") result.sort = sort;
   return result;

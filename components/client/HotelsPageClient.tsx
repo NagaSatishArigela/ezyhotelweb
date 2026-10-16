@@ -1,5 +1,6 @@
 "use client";
 
+import { propertyTypeLabel } from "@/lib/accommodation";
 import { useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -41,7 +42,7 @@ export default function HotelsPageClient({ viewModels, totalCount, activeFilters
     : "Find your stay";
 
   // Count active non-sort filters for the badge
-  const filterCount = [activeFilters.q, activeFilters.city, activeFilters.minPrice, activeFilters.maxPrice, activeFilters.amenities, activeFilters.rating].filter(Boolean).length;
+  const filterCount = [activeFilters.propertyType, activeFilters.q, activeFilters.city, activeFilters.minPrice, activeFilters.maxPrice, activeFilters.amenities, activeFilters.rating].filter(Boolean).length;
 
   const setSort = (sort: FilterParams["sort"]) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -54,6 +55,7 @@ export default function HotelsPageClient({ viewModels, totalCount, activeFilters
 
   // Active filter chips (excludes sort)
   const chips: { label: string; key: string }[] = [
+    ...(activeFilters.propertyType ? [{ label: propertyTypeLabel(activeFilters.propertyType)!, key: "propertyType" }] : []),
     ...(activeFilters.q ? [{ label: `"${activeFilters.q}"`, key: "q" }] : []),
     ...(activeFilters.city ? [{ label: activeFilters.city, key: "city" }] : []),
     ...(activeFilters.rating ? [{ label: `${activeFilters.rating}+ stars`, key: "rating" }] : []),

@@ -1,5 +1,6 @@
 "use client";
 
+import { PROPERTY_TYPES } from "@/lib/accommodation";
 import { XCircle } from "lucide-react";
 import { useHotelFilters } from "@/modules/hotels/hooks/useHotelFilters";
 import { amenitiesForProperty, normalizeAmenity } from "@/lib/amenity-catalog";
@@ -51,6 +52,13 @@ export default function FilterSidebar({ onClose }: FilterSidebarProps) {
       </div>
 
       <div className="space-y-8">
+        <div>
+          <label htmlFor="service-type" className="block font-semibold text-slate-900 dark:text-white mb-4">Service type</label>
+          <select id="service-type" value={filters.propertyType ?? ""} onChange={(e) => setFilter("propertyType", e.target.value || undefined)} className="w-full rounded-lg border border-slate-300 bg-transparent p-2 text-slate-700 dark:text-white">
+            <option value="">All services</option>
+            {PROPERTY_TYPES.map((type) => <option key={type.value} value={type.value}>{type.label}</option>)}
+          </select>
+        </div>
         <div>
           <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Price per hour</h3>
           <input

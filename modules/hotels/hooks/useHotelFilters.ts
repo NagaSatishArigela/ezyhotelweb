@@ -1,5 +1,7 @@
 "use client";
 
+import type { PublicPropertyType } from "@/lib/accommodation";
+
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useRef, useEffect } from "react";
 import type { FilterParams } from "@/types";
@@ -13,6 +15,7 @@ export function useHotelFilters() {
   useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
   const filters: FilterParams = {
+    propertyType: searchParams.get("propertyType") as PublicPropertyType | null ?? undefined,
     q: searchParams.get("q") ?? undefined,
     minPrice: searchParams.get("minPrice") ?? undefined,
     maxPrice: searchParams.get("maxPrice") ?? undefined,

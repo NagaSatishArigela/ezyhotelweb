@@ -13,6 +13,7 @@ export function filterHotels(params: FilterParams) {
   const amenities = params.amenities ? params.amenities.split(",").filter(Boolean) : [];
 
   const filtered = hotelsData.filter((hotel) => {
+    if (params.propertyType && params.propertyType !== "hotel") return false;
     const matchesSearch = hotel.name.toLowerCase().includes(q) || hotel.area.toLowerCase().includes(q);
     const matchesCity = !city || hotel.city.toLowerCase() === city;
     const matchesPrice = hotel.price >= minPrice && hotel.price <= maxPrice;
@@ -38,6 +39,7 @@ async function fetchRealProperties(params: FilterParams) {
       limit: 50,
       q: params.q,
       city: params.city,
+      propertyType: params.propertyType,
       minPrice: params.minPrice ? Number(params.minPrice) * 100 : undefined,
       maxPrice: params.maxPrice ? Number(params.maxPrice) * 100 : undefined,
       amenities: params.amenities,

@@ -1,3 +1,5 @@
+import type { PublicPropertyType, OtherAccommodation, DormitoryDetails } from "./accommodation";
+export type { PublicPropertyType } from "./accommodation";
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "https://ezyhotelserver-production.up.railway.app";
 
@@ -170,19 +172,6 @@ export const authApi = {
 
 // ── Public Properties (guest discovery) API ────────────────────────────────
 
-export type PublicPropertyType =
-  | "hotel"
-  | "resort"
-  | "guest_house"
-  | "homestay"
-  | "villa"
-  | "pg"
-  | "farm"
-  | "lodge"
-  | "dormitory"
-  | "banquet"
-  | "other";
-
 export type PublicPropertyCategory = "budget" | "mid" | "premium";
 
 export type PublicBookingPolicy = "hourly" | "fullday" | "both";
@@ -206,6 +195,7 @@ export interface PublicPropertySummary {
 }
 
 export interface PublicRoomType {
+  dormitory?: DormitoryDetails | null;
   id: string;
   type: RoomTypeCategory;
   count: number;
@@ -221,6 +211,7 @@ export interface PublicPhoto {
 }
 
 export interface PublicPropertyDetail extends PublicPropertySummary {
+  otherAccommodation?: OtherAccommodation | null;
   propertyDetails?: Record<string, unknown> | null;
   addressLine1: string | null;
   addressLine2: string | null;
@@ -246,6 +237,7 @@ export interface PublicPropertyListResult {
 export type PublicPropertySort = "relevance" | "price_asc" | "price_desc" | "newest";
 
 export interface PublicPropertyListParams {
+  propertyType?: PublicPropertyType;
   page?: number;
   limit?: number;
   q?: string;
@@ -265,6 +257,7 @@ export const publicPropertiesApi = {
     if (params.city) query.set("city", params.city);
     if (params.minPrice != null) query.set("minPrice", String(params.minPrice));
     if (params.maxPrice != null) query.set("maxPrice", String(params.maxPrice));
+    if (params.propertyType) query.set("propertyType", params.propertyType);
     if (params.amenities) query.set("amenities", params.amenities);
     if (params.sort) query.set("sort", params.sort);
     const qs = query.toString();

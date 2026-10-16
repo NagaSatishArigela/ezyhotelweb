@@ -1,3 +1,5 @@
+import AccommodationDetails from "@/components/server/AccommodationDetails";
+import { amenityId } from "@/lib/amenities";
 import Link from "next/link";
 import { ChevronRight, MapPin, Wifi, Wind, Car, Waves, Dumbbell, Utensils, Shield, Zap, Clock } from "lucide-react";
 import type { PublicPropertyDetail } from "@/lib/api";
@@ -8,14 +10,14 @@ import { amenityLabel } from "@/lib/amenity-catalog";
 import { detailGroups, PROPERTY_TYPE_OPTIONS } from "@/lib/property-details";
 
 const AMENITY_ICONS: Record<string, React.ElementType> = {
-  WiFi: Wifi,
-  AC: Wind,
-  Parking: Car,
-  Pool: Waves,
-  Gym: Dumbbell,
-  Restaurant: Utensils,
-  Spa: Shield,
-  TV: Zap,
+  wifi: Wifi,
+  ac: Wind,
+  parking: Car,
+  pool: Waves,
+  gym: Dumbbell,
+  restaurant: Utensils,
+  spa: Shield,
+  tv: Zap,
 };
 
 const policies = [
@@ -86,7 +88,7 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
               <h2 className="text-xl font-bold text-gray-900">Amenities</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {property.amenities.map((amenity) => {
-                  const Icon = AMENITY_ICONS[amenity] ?? Shield;
+                  const Icon = AMENITY_ICONS[amenityId(amenity)] ?? Shield;
                   return (
                     <div key={amenity} className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-orange-200 transition-colors">
                       <Icon className="w-5 h-5 text-orange-600 shrink-0" />
@@ -98,6 +100,7 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
             </div>
           )}
 
+          <AccommodationDetails property={property} />
           {detailGroups(property.propertyType ?? "").map(group => {
             const fields = group.fields.filter(field => property.propertyDetails?.[field.id] !== undefined);
             if (!fields.length) return null;

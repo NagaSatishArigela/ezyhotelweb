@@ -84,7 +84,7 @@ export default function RealHotelBookingPanel({
   })();
 
   const selectedRate = bookingType === "hourly" ? hourlyRupees : fulldayRupees;
-  const canReserve = selectedRate != null && selectedRate > 0 && guests <= (selectedRoomType.maxOccupancy ?? 10) && selectedRoomType.count > 0 && !!checkInDate;
+  const canReserve = selectedRate != null && selectedRate > 0 && guests <= Math.min(selectedRoomType.maxOccupancy ?? 10, 50) && selectedRoomType.count > 0 && !!checkInDate;
 
   const handleReserve = () => {
     if (!canReserve) return;
@@ -137,7 +137,7 @@ export default function RealHotelBookingPanel({
                   >
                     {bookableRoomTypes.map((room) => (
                       <option key={room.id} value={room.id}>
-                        {ROOM_TYPE_LABELS[room.type] ?? room.type} {room.maxOccupancy ? `(up to ${room.maxOccupancy} guests)` : ""}
+                        {room.dormitory?.roomName ?? ROOM_TYPE_LABELS[room.type] ?? room.type} {room.maxOccupancy ? `(up to ${room.maxOccupancy} guests)` : ""}
                       </option>
                     ))}
                   </select>
@@ -180,7 +180,7 @@ export default function RealHotelBookingPanel({
                 <div className="flex items-center justify-between">
                   <button onClick={() => setGuests(Math.max(1, guests - 1))} className="w-6 h-6 bg-white border border-gray-200 rounded-full text-sm font-bold hover:border-orange-400 transition-colors flex items-center justify-center">−</button>
                   <span className="font-black text-gray-900">{guests}</span>
-                  <button onClick={() => setGuests(Math.min(selectedRoomType.maxOccupancy ?? 10, guests + 1))} className="w-6 h-6 bg-white border border-gray-200 rounded-full text-sm font-bold hover:border-orange-400 transition-colors flex items-center justify-center">+</button>
+                  <button onClick={() => setGuests(Math.min(Math.min(selectedRoomType.maxOccupancy ?? 10, 50), guests + 1))} className="w-6 h-6 bg-white border border-gray-200 rounded-full text-sm font-bold hover:border-orange-400 transition-colors flex items-center justify-center">+</button>
                 </div>
               </div>
 
@@ -232,7 +232,7 @@ export default function RealHotelBookingPanel({
                       </div>
                     </div>
                     <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1 flex items-center gap-1">
-                      <BedDouble className="w-3 h-3" /> {ROOM_TYPE_LABELS[selectedRoomType.type] ?? selectedRoomType.type} · {guests} Guest{guests > 1 ? "s" : ""}
+                      <BedDouble className="w-3 h-3" /> {selectedRoomType.dormitory?.roomName ?? ROOM_TYPE_LABELS[selectedRoomType.type] ?? selectedRoomType.type} · {guests} Guest{guests > 1 ? "s" : ""}
                     </p>
                     <div className="bg-white border border-gray-100 rounded-2xl p-3 space-y-2">
                       <div className="flex justify-between text-[10px] font-bold text-gray-500">
