@@ -3,8 +3,9 @@
 import { PROPERTY_TYPES } from "@/lib/accommodation";
 import { XCircle } from "lucide-react";
 import { useHotelFilters } from "@/modules/hotels/hooks/useHotelFilters";
+import { amenitiesForProperty, normalizeAmenity } from "@/lib/amenity-catalog";
 
-const AMENITIES = ["WiFi", "AC", "Parking", "Couples Allowed"];
+const AMENITIES = amenitiesForProperty("other");
 const RATINGS = [4, 3, 2];
 
 interface FilterSidebarProps {
@@ -15,7 +16,7 @@ export default function FilterSidebar({ onClose }: FilterSidebarProps) {
   const { filters, setFilter, clearFilters } = useHotelFilters();
 
   const toggleAmenity = (amenity: string) => {
-    const current = filters.amenities ? filters.amenities.split(",").filter(Boolean) : [];
+    const current = filters.amenities ? filters.amenities.split(",").filter(Boolean).map(normalizeAmenity) : [];
     const next = current.includes(amenity)
       ? current.filter((a) => a !== amenity)
       : [...current, amenity];
@@ -28,7 +29,7 @@ export default function FilterSidebar({ onClose }: FilterSidebarProps) {
   };
 
   const maxPrice = Number(filters.maxPrice ?? 200);
-  const activeAmenities = filters.amenities ? filters.amenities.split(",").filter(Boolean) : [];
+  const activeAmenities = filters.amenities ? filters.amenities.split(",").filter(Boolean).map(normalizeAmenity) : [];
   const activeRating = Number(filters.rating ?? 0);
 
   return (
@@ -76,7 +77,8 @@ export default function FilterSidebar({ onClose }: FilterSidebarProps) {
 
         <div>
           <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Amenities</h3>
-          {AMENITIES.map((amenity) => (
+          <div className="max-h-64 overflow-y-auto">
+          {AMENITIES.map(({ id: amenity, label }) => (
             <label key={amenity} className="flex items-center space-x-3 cursor-pointer mb-2">
               <input
                 type="checkbox"
@@ -84,9 +86,10 @@ export default function FilterSidebar({ onClose }: FilterSidebarProps) {
                 onChange={() => toggleAmenity(amenity)}
                 className="h-5 w-5 rounded border-slate-300 bg-transparent text-primary focus:ring-primary/50"
               />
-              <span className="text-slate-600 dark:text-slate-300">{amenity}</span>
+              <span className="text-slate-600 dark:text-slate-300">{label}</span>
             </label>
           ))}
+          </div>
         </div>
 
         <div>

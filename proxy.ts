@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAccessToken } from "@/lib/session";
 
-const PORTAL_URL = process.env.NEXT_PUBLIC_PORTAL_URL ?? "http://localhost:3000";
+import { PORTAL_URL } from "@/lib/portal";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -11,7 +11,7 @@ export async function proxy(req: NextRequest) {
   // portal. Redirect there instead of to /register: an authenticated owner sent
   // to /register?intent=owner is re-redirected back to /owner/* → infinite loop.
   if (pathname === "/owner" || pathname.startsWith("/owner/") || pathname === "/owner-auth") {
-    return NextResponse.redirect(new URL("/login", PORTAL_URL));
+    return NextResponse.redirect(new URL("/list-property", PORTAL_URL));
   }
 
   // All other protected routes — any authenticated guest user

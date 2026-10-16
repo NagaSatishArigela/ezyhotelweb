@@ -163,8 +163,8 @@ export default function HotelBookingPanel({ basePrice, hotelId, plans }: HotelBo
                     <span className="text-xs font-black text-gray-400 uppercase ml-1">Hrs</span>
                   </div>
                 </div>
-                <Slider value={[selectedHours]} onValueChange={(v) => setSelectedHours(v[0])} min={1} max={24} step={1} className="cursor-pointer py-3" />
-                <div className="flex justify-between text-[9px] font-black text-gray-300 uppercase tracking-widest">
+                <Slider aria-label="Stay duration in hours" value={[selectedHours]} onValueChange={(v) => setSelectedHours(v[0])} min={1} max={24} step={1} className="cursor-pointer py-3" />
+                <div className="flex justify-between text-[9px] font-black text-gray-600 uppercase tracking-widest">
                   <span>Min 1h</span><span>Max 24h</span>
                 </div>
               </div>

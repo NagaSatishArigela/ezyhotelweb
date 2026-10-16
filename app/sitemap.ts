@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: BASE, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${BASE}/hotels`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
     { url: `${BASE}/terms`, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${BASE}/partner-terms`, changeFrequency: "monthly", priority: 0.3 },
     { url: `${BASE}/privacy`, changeFrequency: "monthly", priority: 0.3 },
     ...propertyUrls,
   ];

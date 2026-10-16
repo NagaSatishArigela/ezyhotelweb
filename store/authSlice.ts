@@ -1,7 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { User } from "@/types";
 
-export type UserRole = "guest" | "owner";
+// Customer-facing state only; hotel roles belong to server-verified portal memberships.
+export type UserRole = "guest";
 
 interface AuthState {
   user: User | null;
@@ -33,7 +34,8 @@ const authSlice = createSlice({
       }>
     ) {
       state.user = action.payload.user;
-      state.role = action.payload.role;
+      // Normalize legacy persisted roles as well as typed login actions.
+      state.role = "guest";
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
       state.isLoading = false;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import styles from "@/components/brand/NavigationPill.module.css";
 import { Heart, Briefcase, PlaneTakeoff, Diamond } from "lucide-react";
 
 const categoryData = [
@@ -15,16 +16,14 @@ export function Categories() {
         <h2 className="text-3xl font-bold tracking-tight text-secondary sm:text-4xl text-center mb-10">
           Find Your Perfect Stay
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <nav aria-label="Stay categories" className="flex gap-4 overflow-x-auto px-1 py-4 lg:justify-center">
           {categoryData.map((category) => (
-            <Link key={category.id} href={category.href} className="group text-center">
-              <div className="relative w-28 h-28 mx-auto bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <category.icon className="h-12 w-12 text-primary" />
-              </div>
-              <p className="mt-4 font-bold text-slate-800">{category.name}</p>
+            <Link key={category.id} href={category.href} className={styles.pill}>
+              <category.icon className="h-6 w-6 text-orange-600" aria-hidden />
+              <span>{category.name}</span>
             </Link>
           ))}
-        </div>
+        </nav>
       </div>
     </section>
   );

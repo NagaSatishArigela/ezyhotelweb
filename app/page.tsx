@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/server/HeroSection";
+import { Categories } from "@/components/server/Categories";
 // import ExclusiveDealsLoader from "@/components/client/ExclusiveDealsLoader";
 import { WhyChooseSection, PerfectForSection, HowItWorksSection } from "@/components/server/HomeSections";
 import { TrendingCities } from "@/components/server/TrendingCities";
@@ -23,6 +24,7 @@ export default function HomePage() {
     <div className="bg-white min-h-screen">
       <main>
         <HeroSection />
+        <Categories />
         {/* Exclusive Deals — hidden for now; re-enable when deals are ready */}
         {/* <ExclusiveDealsLoader /> */}
         <WhyChooseSection />

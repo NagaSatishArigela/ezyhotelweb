@@ -1,0 +1,30 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: .65rem 1.1rem;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  color: #9a3412;
+  background: linear-gradient(180deg, #fff 0%, #fff7ed 100%);
+  box-shadow: 0 5px 12px rgb(194 65 12 / 12%), inset 0 2px 0 #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: box-shadow .2s ease, background .2s ease, transform .2s ease;
+}
+.pill:hover {
+  color: #7c2d12;
+  border-color: #fb923c;
+  background: #ffedd5;
+  box-shadow: 0 7px 16px rgb(194 65 12 / 20%), inset 0 2px 0 #fff;
+  transform: translateY(-1px);
+}
+.pill:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 2px 5px rgb(154 52 18 / 16%);
+}
+.pill:focus-visible { outline: 3px solid #c2410c; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .pill { transition: none; } }

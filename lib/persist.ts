@@ -19,7 +19,7 @@ function safeWrite(key: string, value: unknown) {
 
 export interface PersistedAuth {
   user: import("@/types").User | null;
-  role: "guest" | "owner" | null;
+  role: import("@/store/authSlice").UserRole | null;
 }
 
 export interface PersistedAuthFull extends PersistedAuth {
@@ -28,11 +28,14 @@ export interface PersistedAuthFull extends PersistedAuth {
 }
 
 export function loadAuth(): PersistedAuth | undefined {
-  return safeRead<PersistedAuth>(AUTH_KEY);
+  const saved = safeRead<PersistedAuth>(AUTH_KEY);
+  if (!saved) return undefined;
+  // Old owner labels are presentation state, never proof of hotel membership.
+  return { user: saved.user ?? null, role: saved.user ? "guest" : null };
 }
 
 export function saveAuth(state: PersistedAuth) {
-  safeWrite(AUTH_KEY, state);
+  safeWrite(AUTH_KEY, { user: state.user, role: state.user ? "guest" : null });
 }
 
 // Synchronous write used right before a full-page navigation (window.location.href).
@@ -40,7 +43,7 @@ export function saveAuth(state: PersistedAuth) {
 // Only user identity (name, role) is persisted; the session cookie carries the
 // access token via the httpOnly pph_session mechanism.
 export function saveAuthImmediate(state: PersistedAuthFull) {
-  const safe: PersistedAuth = { user: state.user, role: state.role };
+  const safe: PersistedAuth = { user: state.user, role: state.user ? "guest" : null };
   safeWrite(AUTH_KEY, safe);
 }
 

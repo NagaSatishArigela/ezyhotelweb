@@ -121,7 +121,7 @@ Raw `Hotel` → `toHotelCardViewModel()` → `HotelCardViewModel`. UI never touc
 
 ### Owner / Partner Portal
 
-Owner onboarding, property creation, verification, inventory, and property operations belong to the separate partner portal. The Web app exposes only the `NEXT_PUBLIC_PORTAL_URL` entry point from the header and profile; it does not render or persist an owner onboarding flow. The `/api/sso/handoff` route remains as shared portal authentication infrastructure.
+Owner onboarding, property creation, verification, inventory, and property operations belong to the separate partner portal. The Web app sends “List your property” entry points to its own `/register` page before the owner continues into the partner flow; it does not render or persist an owner onboarding flow. The `/api/sso/handoff` route remains as shared portal authentication infrastructure.
 
 ### `@` path alias
 

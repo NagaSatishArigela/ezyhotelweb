@@ -28,7 +28,7 @@ function isJWTPayload(p: JosePayload): p is JosePayload & JWTPayload {
     typeof p["userId"] === "number" &&
     typeof p["email"] === "string" &&
     typeof p["name"] === "string" &&
-    (p["role"] === "guest" || p["role"] === "owner")
+    p["role"] === "guest"
   );
 }
 

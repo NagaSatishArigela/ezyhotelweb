@@ -171,6 +171,7 @@ function RegisterForm() {
     setIsSubmitting(true);
     try {
       const res = await authApi.sendOtp(clean);
+      setPhone(clean);
       const backendOtp = typeof res?.otp === "string" ? res.otp : undefined;
       const generatedDevOtp =
         isDevMode() && otpExposureEnabled ? (backendOtp ?? buildDevOtp(clean)) : null;
@@ -336,16 +337,17 @@ function RegisterForm() {
             ))}
           </div>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">
+          <h2 className={`text-2xl font-bold text-gray-900 ${step === "OTP" ? "mb-8" : "mb-1"}`}>
             {step === "PHONE" && "Create your account"}
             {step === "OTP" && "Verify your phone"}
             {step === "CREDENTIALS" && "Set up your login"}
           </h2>
-          <p className="text-sm text-gray-500 mb-8">
-            {step === "PHONE" && "Enter your mobile number to get started"}
-            {step === "OTP" && `OTP sent to +91 ${phone}`}
-            {step === "CREDENTIALS" && "Almost done — add your email and password"}
-          </p>
+          {step !== "OTP" && (
+            <p className="text-sm text-gray-500 mb-8">
+              {step === "PHONE" && "Enter your mobile number to get started"}
+              {step === "CREDENTIALS" && "Almost done — add your email and password"}
+            </p>
+          )}
 
           {/* ── STEP 1: PHONE ─────────────────────────────────────────── */}
           {step === "PHONE" && (

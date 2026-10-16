@@ -1,6 +1,6 @@
-import { amenityLabel } from "@/lib/amenities";
 import type { Hotel, HotelCardViewModel } from "@/types";
 import type { PublicPropertySummary } from "@/lib/api";
+import { amenityLabel } from "@/lib/amenity-catalog";
 
 export function toHotelCardViewModel(hotel: Hotel): HotelCardViewModel {
   const basePrice = hotel.price;

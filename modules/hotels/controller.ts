@@ -1,8 +1,8 @@
-import { amenityId } from "@/lib/amenities";
 import { hotelsData } from "@/data/hotelsData";
 import { toHotelCardViewModel, toRealPropertyCardViewModel } from "./view-model";
 import { publicPropertiesApi } from "@/lib/api";
 import type { FilterParams, HotelsPageViewModel } from "@/types";
+import { normalizeAmenity } from "@/lib/amenity-catalog";
 
 export function filterHotels(params: FilterParams) {
   const q = params.q?.toLowerCase() ?? "";
@@ -18,7 +18,8 @@ export function filterHotels(params: FilterParams) {
     const matchesCity = !city || hotel.city.toLowerCase() === city;
     const matchesPrice = hotel.price >= minPrice && hotel.price <= maxPrice;
     const matchesRating = hotel.rating >= rating;
-    const matchesAmenities = amenities.every((a) => hotel.amenities.some((existing) => amenityId(existing) === amenityId(a)));
+    const hotelAmenities = hotel.amenities.map(normalizeAmenity);
+    const matchesAmenities = amenities.every((a) => hotelAmenities.includes(normalizeAmenity(a)));
     return matchesSearch && matchesCity && matchesPrice && matchesRating && matchesAmenities;
   });
 
