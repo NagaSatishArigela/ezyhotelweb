@@ -1,3 +1,4 @@
+import type { PublicPropertyType } from "@/lib/accommodation";
 export interface Hotel {
   id: number;
   name: string;
@@ -36,6 +37,7 @@ export interface HotelCardViewModel {
 }
 
 export interface FilterParams {
+  propertyType?: PublicPropertyType;
   q?: string;
   city?: string;
   minPrice?: string;

@@ -25,7 +25,7 @@ export function Footer() {
             <h5 className="text-lg font-bold mb-6">Explore</h5>
             <ul className="space-y-4 text-gray-400 font-medium">
               <li><Link href="/hotels" className="hover:text-brand-orange transition-colors">Featured Hotels</Link></li>
-              <li><a href="/#trending-cities" className="hover:text-brand-orange transition-colors">Trending Cities</a></li>
+              <li><Link href="/#trending-cities" className="hover:text-brand-orange transition-colors">Trending Cities</Link></li>
             </ul>
           </div>
 

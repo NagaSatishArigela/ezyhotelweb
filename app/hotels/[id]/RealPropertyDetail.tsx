@@ -1,3 +1,6 @@
+import AccommodationDetails from "@/components/server/AccommodationDetails";
+import { propertyTypeLabel } from "@/lib/accommodation";
+import { amenityId, amenityLabel } from "@/lib/amenities";
 import Link from "next/link";
 import { ChevronRight, MapPin, Wifi, Wind, Car, Waves, Dumbbell, Utensils, Shield, Zap, Clock } from "lucide-react";
 import type { PublicPropertyDetail } from "@/lib/api";
@@ -6,14 +9,14 @@ import HotelLocationMap from "@/components/client/HotelLocationMap";
 import PropertyReviews from "@/components/client/PropertyReviews";
 
 const AMENITY_ICONS: Record<string, React.ElementType> = {
-  WiFi: Wifi,
-  AC: Wind,
-  Parking: Car,
-  Pool: Waves,
-  Gym: Dumbbell,
-  Restaurant: Utensils,
-  Spa: Shield,
-  TV: Zap,
+  wifi: Wifi,
+  ac: Wind,
+  parking: Car,
+  pool: Waves,
+  gym: Dumbbell,
+  restaurant: Utensils,
+  spa: Shield,
+  tv: Zap,
 };
 
 const policies = [
@@ -54,6 +57,7 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
             <div className="space-y-2">
               <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 leading-tight">{property.name}</h1>
               <div className="flex flex-wrap items-center gap-2 lg:gap-3">
+                {property.propertyType && <span className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded text-xs font-bold">{propertyTypeLabel(property.propertyType)}</span>}
                 {property.category && (
                   <span className="bg-[#E8F5E9] text-[#2E7D32] px-2 py-0.5 rounded text-[10px] font-bold border border-[#C8E6C9] flex items-center gap-1 uppercase">
                     <Zap className="w-3 h-3 fill-[#2E7D32]" /> {property.category}
@@ -78,17 +82,19 @@ export default function RealPropertyDetail({ property }: { property: PublicPrope
               <h2 className="text-xl font-bold text-gray-900">Amenities</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {property.amenities.map((amenity) => {
-                  const Icon = AMENITY_ICONS[amenity] ?? Shield;
+                  const Icon = AMENITY_ICONS[amenityId(amenity)] ?? Shield;
                   return (
                     <div key={amenity} className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-orange-200 transition-colors">
                       <Icon className="w-5 h-5 text-orange-600 shrink-0" />
-                      <span className="text-sm font-bold text-gray-700">{amenity}</span>
+                      <span className="text-sm font-bold text-gray-700">{amenityLabel(amenity)}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
           )}
+
+          <AccommodationDetails property={property} />
 
           {property.latitude != null && property.longitude != null && (
             <div className="bg-white p-4 lg:p-8 rounded-xl border border-gray-100 shadow-sm space-y-6">
